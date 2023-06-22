@@ -1,6 +1,5 @@
 package com.example.demo;
 
-import com.example.demo.entity.Order;
 import org.apache.kafka.clients.producer.internals.DefaultPartitioner;
 import org.apache.kafka.common.Cluster;
 
@@ -14,12 +13,7 @@ public class CustomPartitioner extends DefaultPartitioner {
                          Object value, byte[] valueBytes,
                          Cluster cluster) {
 
-        String partitionKey = null;
-        if (Objects.nonNull(key)) {
-            Order bookingKey = (Order) key;
-            keyBytes = bookingKey.getFirstName().getBytes(StandardCharsets.UTF_8);
-        }
-        return super.partition(topic, partitionKey, keyBytes, value,
+        return super.partition(topic, "sdfkhvj", keyBytes, value,
                 valueBytes, cluster);
     }
 }

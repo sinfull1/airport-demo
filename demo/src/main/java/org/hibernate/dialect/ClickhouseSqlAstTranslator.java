@@ -235,8 +235,8 @@ public class ClickhouseSqlAstTranslator<T extends JdbcOperation> extends Abstrac
         return this.getDialect().getVersion().isSameOrAfter(8) ? "" : this.getFromDual();
     }
 
-    public ClickHouseDialect6 getDialect() {
-        return (ClickHouseDialect6) DialectDelegateWrapper.extractRealDialect(super.getDialect());
+    public ClickHouseDialect getDialect() {
+        return (ClickHouseDialect) DialectDelegateWrapper.extractRealDialect(super.getDialect());
     }
 
     public void visitCastTarget(CastTarget castTarget) {

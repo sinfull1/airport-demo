@@ -6,6 +6,7 @@ package org.hibernate.tool.schema.internal;
 //
 
 
+import jakarta.persistence.PartitionKey;
 import jakarta.persistence.TableEngine;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.Identifier;
@@ -23,6 +24,7 @@ import org.hibernate.tool.schema.spi.SchemaManagementException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class ClickHouseTableExporter extends StandardTableExporter {
     protected final Dialect dialect;
@@ -54,7 +56,7 @@ public class ClickHouseTableExporter extends StandardTableExporter {
         }
         Class<?> entityClass = persistentClass.getMappedClass();
         TableEngine tableEngine = entityClass.getAnnotation(TableEngine.class);
-
+        PartitionKey partitionKey = entityClass.getAnnotation(PartitionKey.class);
 
         try {
             String formattedTableName = context.format(tableName);
@@ -88,18 +90,35 @@ public class ClickHouseTableExporter extends StandardTableExporter {
 
             this.applyTableTypeString(createTable);
             if (tableEngine != null) {
-                createTable.append(tableEngine.name() + "() ");
+                createTable.append(tableEngine.name()).append(" (");
+                if (partitionKey.columns().length >0) {
+                    StringJoiner joiner = new StringJoiner(",");
+                    for (String colId : partitionKey.columns()) {
+                        joiner.add(colId);
+                    }
+                    createTable.append(joiner);
+                }
+                createTable.append( ") ");
             }
-
+            if (partitionKey != null) {
+                createTable.append( " partition by (");
+                StringJoiner joiner = new StringJoiner(",");
+                for(String colId : partitionKey.columns()) {
+                    joiner.add(colId);
+                }
+                createTable.append(joiner).append(") ");
+            }
             if (table.hasPrimaryKey()) {
                 ClickHousePrimaryKey clickHousePrimaryKey = new ClickHousePrimaryKey(table.getPrimaryKey());
                 createTable.append(clickHousePrimaryKey.sqlConstraintString(this.dialect));
             }
+
+
             List<String> sqlStrings = new ArrayList();
             sqlStrings.add(createTable.toString());
-            this.applyComments(table, (String) formattedTableName, sqlStrings);
+            this.applyComments(table, formattedTableName, sqlStrings);
             this.applyInitCommands(table, sqlStrings, context);
-            return (String[]) sqlStrings.toArray(StringHelper.EMPTY_STRINGS);
+            return sqlStrings.toArray(StringHelper.EMPTY_STRINGS);
         } catch (Exception var10) {
             throw var10;
         }

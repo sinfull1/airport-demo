@@ -11,7 +11,6 @@ import org.hibernate.PessimisticLockException;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.boot.model.TypeContributions;
 import org.hibernate.dialect.function.CommonFunctionFactory;
-import org.hibernate.dialect.function.ListaggGroupConcatEmulation;
 import org.hibernate.dialect.hint.IndexQueryHintHandler;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
 import org.hibernate.dialect.identity.MySQLIdentityColumnSupport;
@@ -73,7 +72,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class ClickHouseDialect6 extends Dialect {
+public class ClickHouseDialect extends Dialect {
     private static final DatabaseVersion MINIMUM_VERSION = DatabaseVersion.make(5, 7);
     private final ClickhouseStorageEngine storageEngine;
     private final Dialect.SizeStrategy sizeStrategy;
@@ -81,23 +80,23 @@ public class ClickHouseDialect6 extends Dialect {
     private final int maxVarbinaryLength;
     private final boolean noBackslashEscapesEnabled;
 
-    public ClickHouseDialect6() {
+    public ClickHouseDialect() {
         this(MINIMUM_VERSION);
     }
 
-    public ClickHouseDialect6(DatabaseVersion version) {
+    public ClickHouseDialect(DatabaseVersion version) {
         this(version, 4);
     }
 
-    public ClickHouseDialect6(DatabaseVersion version, int bytesPerCharacter) {
+    public ClickHouseDialect(DatabaseVersion version, int bytesPerCharacter) {
         this(version, bytesPerCharacter, false);
     }
 
-    public ClickHouseDialect6(DatabaseVersion version, MySQLServerConfiguration serverConfiguration) {
+    public ClickHouseDialect(DatabaseVersion version, MySQLServerConfiguration serverConfiguration) {
         this(version, serverConfiguration.getBytesPerCharacter(), serverConfiguration.isNoBackslashEscapesEnabled());
     }
 
-    public ClickHouseDialect6(DatabaseVersion version, int bytesPerCharacter, boolean noBackslashEscapes) {
+    public ClickHouseDialect(DatabaseVersion version, int bytesPerCharacter, boolean noBackslashEscapes) {
         super(version);
         this.storageEngine = this.createStorageEngine();
         this.sizeStrategy = new Dialect.SizeStrategyImpl() {
@@ -117,7 +116,7 @@ public class ClickHouseDialect6 extends Dialect {
         this.noBackslashEscapesEnabled = noBackslashEscapes;
     }
 
-    public ClickHouseDialect6(DialectResolutionInfo info) {
+    public ClickHouseDialect(DialectResolutionInfo info) {
         this(createVersion(info), MySQLServerConfiguration.fromDatabaseMetadata(info.getDatabaseMetadata()));
         this.registerKeywords(info);
     }
@@ -153,12 +152,14 @@ public class ClickHouseDialect6 extends Dialect {
         return new ClickhouseStorageEngine();
     }
 
+
+    // Add the correct defintion of the column types
     protected String columnType(int sqlTypeCode) {
         switch (sqlTypeCode) {
             case 2:
                 return this.columnType(3);
             case 16:
-                return "bit";
+                return "Bool";
             case 93:
                 return "datetime($p)";
             case 2004:

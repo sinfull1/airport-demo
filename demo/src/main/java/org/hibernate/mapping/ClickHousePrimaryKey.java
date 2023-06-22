@@ -15,7 +15,7 @@ public class ClickHousePrimaryKey {
 
 
     public String sqlConstraintString(Dialect dialect) {
-        StringBuilder buf = new StringBuilder("order by (");
+        StringBuilder buf = new StringBuilder(" order by ( ");
         Iterator iter = primaryKey.getColumnIterator();
 
         while (iter.hasNext()) {

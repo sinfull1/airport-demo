@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 
+import com.clickhouse.client.ClickHouseResponse;
 import com.example.demo.entity.Ontime;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,7 +15,6 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             "arraySort(groupArray(o.DepTime)) as departures from ontime o " +
             "group by o.Origin, o.Tail_Number order by hops desc LIMIT 10", nativeQuery=true)
     List<ResultDao> getResult();
-
 
     @Query(value = "SELECT o.FlightDate as flightDate, o.Reporting_Airline as airline, o.Tail_Number as tailNumber,\n" +
             "    arraySort(groupArray(o.ArrTime)) AS arrivals, " +

@@ -18,6 +18,7 @@ import java.util.List;
 @Setter
 @Table(name = "guests")
 @TableEngine(name = "MergeTree")
+@PartitionKey(columns = {"guestType, shortInt"})
 public class Guest {
     @Id
     @GeneratedValue(generator = "uuid2")
