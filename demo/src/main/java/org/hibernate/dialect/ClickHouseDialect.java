@@ -10,6 +10,8 @@ import jakarta.persistence.TemporalType;
 import org.hibernate.PessimisticLockException;
 import org.hibernate.boot.model.FunctionContributions;
 import org.hibernate.boot.model.TypeContributions;
+import org.hibernate.dialect.function.ArraySortFunction;
+import org.hibernate.dialect.function.AvgFunction;
 import org.hibernate.dialect.function.CommonFunctionFactory;
 import org.hibernate.dialect.hint.IndexQueryHintHandler;
 import org.hibernate.dialect.identity.IdentityColumnSupport;
@@ -47,6 +49,7 @@ import org.hibernate.query.sqm.mutation.spi.SqmMultiTableInsertStrategy;
 import org.hibernate.query.sqm.mutation.spi.SqmMultiTableMutationStrategy;
 import org.hibernate.query.sqm.produce.function.FunctionParameterType;
 import org.hibernate.service.ServiceRegistry;
+import org.hibernate.sql.ast.SqlAstNodeRenderingMode;
 import org.hibernate.sql.ast.SqlAstTranslator;
 import org.hibernate.sql.ast.SqlAstTranslatorFactory;
 import org.hibernate.sql.ast.spi.SqlAppender;
@@ -73,7 +76,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class ClickHouseDialect extends Dialect {
-    private static final DatabaseVersion MINIMUM_VERSION = DatabaseVersion.make(5, 7);
+    private static final DatabaseVersion MINIMUM_VERSION = DatabaseVersion.make(23, 1,2);
     private final ClickhouseStorageEngine storageEngine;
     private final Dialect.SizeStrategy sizeStrategy;
     private final int maxVarcharLength;
@@ -462,7 +465,14 @@ public class ClickHouseDialect extends Dialect {
         functionFactory.localtimeLocaltimestamp();
         BasicTypeRegistry basicTypeRegistry = functionContributions.getTypeConfiguration().getBasicTypeRegistry();
         SqmFunctionRegistry functionRegistry = functionContributions.getFunctionRegistry();
-
+        functionRegistry.register(
+                "arraySort",
+                new ArraySortFunction(
+                        this,
+                        functionContributions.getTypeConfiguration(),
+                        SqlAstNodeRenderingMode.DEFAULT
+                )
+        );
         functionRegistry.noArgsBuilder("localtime").setInvariantType(basicTypeRegistry.resolve(StandardBasicTypes.TIMESTAMP)).setUseParenthesesWhenNoArgs(false).register();
         if (this.getMySQLVersion().isSameOrAfter(8)) {
             functionRegistry.patternDescriptorBuilder("pi", "cast(pi() as double)").setInvariantType(basicTypeRegistry.resolve(StandardBasicTypes.DOUBLE)).setExactArgumentCount(0).setArgumentListSignature("").register();

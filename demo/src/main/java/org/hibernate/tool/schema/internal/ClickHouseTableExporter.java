@@ -91,23 +91,27 @@ public class ClickHouseTableExporter extends StandardTableExporter {
             this.applyTableTypeString(createTable);
             if (tableEngine != null) {
                 createTable.append(tableEngine.name()).append(" (");
-                if (partitionKey.columns().length >0) {
+                StringJoiner joiner = new StringJoiner(",");
+                for (String colId : tableEngine.columns()) {
+                    joiner.add(colId);
+                }
+                createTable.append(joiner);
+                createTable.append(") ");
+            }
+            if (partitionKey != null) {
+                createTable.append(" partition by (");
+                if (partitionKey.columns().length > 0) {
                     StringJoiner joiner = new StringJoiner(",");
                     for (String colId : partitionKey.columns()) {
                         joiner.add(colId);
                     }
                     createTable.append(joiner);
                 }
-                createTable.append( ") ");
+                createTable.append(") ");
             }
-            if (partitionKey != null) {
-                createTable.append( " partition by (");
-                StringJoiner joiner = new StringJoiner(",");
-                for(String colId : partitionKey.columns()) {
-                    joiner.add(colId);
-                }
-                createTable.append(joiner).append(") ");
-            }
+
+
+
             if (table.hasPrimaryKey()) {
                 ClickHousePrimaryKey clickHousePrimaryKey = new ClickHousePrimaryKey(table.getPrimaryKey());
                 createTable.append(clickHousePrimaryKey.sqlConstraintString(this.dialect));

@@ -12,23 +12,24 @@ import java.util.Date;
 @Getter
 @Setter
 @TableEngine(name = "MergeTree")
+@IdClass(OntimeId.class)
 @Table(name = "ontime")
 public class Ontime {
+    //Year, Quarter, Month, DayofMonth, FlightDate, IATA_CODE_Reporting_Airline
 
     @Id
-    @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
-    private String id;
-
     @Column(name = "Year")
     private int year;
 
+    @Id
     @Column(name = "Quarter")
     private int quarter;
 
+    @Id
     @Column(name = "Month")
     private int month;
 
+    @Id
     @Column(name = "DayofMonth")
     private int dayOfMonth;
 
@@ -41,9 +42,10 @@ public class Ontime {
     @Column(name = "Reporting_Airline")
     private String reportingAirline;
 
+
     @Column(name = "DOT_ID_Reporting_Airline")
     private int dotIdReportingAirline;
-
+    @Id
     @Column(name = "IATA_CODE_Reporting_Airline")
     private String iataCodeReportingAirline;
 

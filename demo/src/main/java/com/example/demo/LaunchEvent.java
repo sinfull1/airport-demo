@@ -31,6 +31,10 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     final GuestRepo guestRepo;
     final OntimeRepo ontimeRepo;
 
+    final static String FILE_NAME = "C:\\Users\\siddhary87\\Downloads\\newSample.csv";
+    final static String TABLE_NAME = "ontime";
+    final static String SERVER_NAME = "http://localhost:18123/default";
+
     @Autowired
     public LaunchEvent(StreamBridge streamBridge, GuestRepo guestRepo, OntimeRepo ontimeRepo) {
         this.streamBridge = streamBridge;
@@ -38,24 +42,19 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         this.ontimeRepo = ontimeRepo;
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationStartedEvent event) {
-        System.out.println("Application is ready");
+    private void loadData(String server, String table, String fileName ) {
         try {
-          ClickHouseClient.load(
-                    ClickHouseNode.of("http://localhost:18123/default"),
-                    "ontime",
-                    ClickHouseFile.of("C:\\Users\\siddhary87\\Downloads\\newSample.csv",
+            ClickHouseClient.load(
+                    ClickHouseNode.of(server),
+                    table,
+                    ClickHouseFile.of(fileName,
                             ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames)).get();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } catch (ExecutionException e) {
+        } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
-        IntStream.range(0, 1).parallel().forEach(x -> {
-            System.out.println("published");
-            streamBridge.send("order-channel", FlatBuffMessageBuilder.getMonsterMessage());
-        });
+    }
+
+    private void  populateGuestTable() {
         Random random = new Random();
         List<Guest> guestList = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
@@ -71,13 +70,21 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
             guestList.add(guest);
         }
         guestRepo.saveAll(guestList);
-        Optional<Guest> guest = guestRepo.findById(guestList.get(0).getId());
-        System.out.println("xxxx" + guest.get().getIpAddress().getAddress());
-        List<ResultDao> result = ontimeRepo.getResult();
-        for (ResultDao resultDao : result) {
-            System.out.println(resultDao.getOrigin() + " " + resultDao.getHops() + " " + resultDao.getTailNumber());
-            System.out.println(ClickHouseArrayMapper.getOrderedIntegerSet(resultDao.getDepartures()));
-        }
+    }
+
+    public void publishMessages() {
+        IntStream.range(0, 1).parallel().forEach(x -> {
+            System.out.println("published");
+            streamBridge.send("order-channel", FlatBuffMessageBuilder.getMonsterMessage());
+        });
+    }
+    @Override
+    public void onApplicationEvent(ApplicationStartedEvent event) {
+        System.out.println("Application is ready");
+        loadData(SERVER_NAME, TABLE_NAME, FILE_NAME);
+        publishMessages();
+        populateGuestTable();
+
         List<NewResultDao> analysis = ontimeRepo.getAnalysis();
         for (NewResultDao resultDao : analysis) {
             System.out.println(resultDao.getAirline() + " " + resultDao.getFlightDate() + " " + resultDao.getTailNumber());

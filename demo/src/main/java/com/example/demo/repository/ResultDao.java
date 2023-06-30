@@ -22,6 +22,8 @@ public interface ResultDao {
 
     Object[] getDepartures();
 
+    Float getAverage();
+
 
 
 }

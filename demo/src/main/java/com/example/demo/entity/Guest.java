@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
+import org.springframework.data.jpa.repository.query.AbstractJpaQuery;
 
 import java.util.Date;
 import java.util.List;
