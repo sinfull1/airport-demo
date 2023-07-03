@@ -17,7 +17,7 @@ public interface NewResultDao {
 
     Object[] getArrivals();
     Object[] getOrigins();
-    Object[] getDestinations();
-    Object[] getDepartures ();
 
+    Object[] getGroups ();
+    Object[] getTops ();
 }

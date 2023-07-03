@@ -89,9 +89,9 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         for (NewResultDao resultDao : analysis) {
             System.out.println(resultDao.getAirline() + " " + resultDao.getFlightDate() + " " + resultDao.getTailNumber());
             System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getOrigins()));
-            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getDestinations()));
+            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getGroups()));
             System.out.println(ClickHouseArrayMapper.getOrderedIntegerSet(resultDao.getArrivals()));
-            System.out.println(ClickHouseArrayMapper.getOrderedIntegerSet(resultDao.getDepartures()));
+            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getTops()));
         }
     }
 }
