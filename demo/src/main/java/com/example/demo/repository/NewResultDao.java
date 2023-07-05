@@ -1,12 +1,6 @@
 package com.example.demo.repository;
 
 
-import com.clickhouse.data.ClickHouseValue;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.util.SortedSet;
-
-
 public interface NewResultDao {
 
     String getFlightDate();
@@ -16,8 +10,10 @@ public interface NewResultDao {
     String getTailNumber();
 
     Object[] getArrivals();
+
     Object[] getOrigins();
 
-    Object[] getGroups ();
-    Object[] getTops ();
+    Object[] getGroups();
+
+    Object[] getTops();
 }

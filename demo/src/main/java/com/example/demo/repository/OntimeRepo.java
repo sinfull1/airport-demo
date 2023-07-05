@@ -1,14 +1,12 @@
 package com.example.demo.repository;
 
 
-import com.clickhouse.client.ClickHouseResponse;
 import com.example.demo.entity.Ontime;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.function.Function;
 
 @Repository
 public interface OntimeRepo extends CrudRepository<Ontime, String> {
@@ -24,8 +22,6 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             "  GROUP BY flightDate, airline, tailNumber " +
             "  ORDER BY flightDate, airline, tailNumber LIMIT 10")
     List<NewResultDao> getAnalysis();
-
-
 
 
 }

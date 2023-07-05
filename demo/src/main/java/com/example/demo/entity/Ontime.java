@@ -4,7 +4,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.util.Date;
 
@@ -190,65 +189,65 @@ public class Ontime {
     @Column(name = "DistanceGroup")
     private int distanceGroup;
 
-    @Column(name = "CarrierDelay", columnDefinition = "Nullable(Float32)" )
+    @Column(name = "CarrierDelay")
     @Nullable
     private Float carrierDelay;
 
-    @Column(name = "WeatherDelay", columnDefinition = "Nullable(Float32)")
+    @Column(name = "WeatherDelay")
     private Float weatherDelay;
 
-    @Column(name = "NASDelay", columnDefinition = "Nullable(Float32)")
+    @Column(name = "NASDelay")
     private Float nasDelay;
 
-    @Column(name = "SecurityDelay", columnDefinition = "Nullable(Float32)")
+    @Column(name = "SecurityDelay")
     private Float securityDelay;
 
-    @Column(name = "LateAircraftDelay",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "LateAircraftDelay")
     private Float lateAircraftDelay;
 
-    @Column(name = "FirstDepTime", columnDefinition = "Nullable(Float32)")
+    @Column(name = "FirstDepTime")
     private Float firstDepTime;
 
-    @Column(name = "TotalAddGTime" , columnDefinition = "Nullable(Float32)")
+    @Column(name = "TotalAddGTime")
     private Float totalAddGTime;
 
-    @Column(name = "LongestAddGTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "LongestAddGTime")
     private Float longestAddGTime;
 
-    @Column(name = "DivAirportLandings",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "DivAirportLandings")
     private Float divAirportLandings;
 
-    @Column(name = "DivReachedDest",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "DivReachedDest")
     private Float divReachedDest;
 
-    @Column(name = "DivActualElapsedTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "DivActualElapsedTime")
     private Float divActualElapsedTime;
 
-    @Column(name = "DivArrDelay",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "DivArrDelay")
     private Float divArrDelay;
 
-    @Column(name = "DivDistance",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "DivDistance")
     private Float divDistance;
 
     @Column(name = "Div1Airport")
     private String div1Airport;
 
-    @Column(name = "Div1AirportID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div1AirportID")
     private int div1AirportID;
 
-    @Column(name = "Div1AirportSeqID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div1AirportSeqID")
     private int div1AirportSeqID;
 
-    @Column(name = "Div1WheelsOn",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div1WheelsOn")
     private int div1WheelsOn;
 
-    @Column(name = "Div1TotalGTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div1TotalGTime")
     private Float div1TotalGTime;
 
-    @Column(name = "Div1LongestGTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div1LongestGTime")
     private Float div1LongestGTime;
 
-    @Column(name = "Div1WheelsOff",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div1WheelsOff")
     private Float div1WheelsOff;
 
     @Column(name = "Div1TailNum")
@@ -257,22 +256,22 @@ public class Ontime {
     @Column(name = "Div2Airport")
     private String div2Airport;
 
-    @Column(name = "Div2AirportID",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div2AirportID")
     private Float div2AirportID;
 
-    @Column(name = "Div2AirportSeqID",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div2AirportSeqID")
     private Float div2AirportSeqID;
 
-    @Column(name = "Div2WheelsOn",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div2WheelsOn")
     private int div2WheelsOn;
 
-    @Column(name = "Div2TotalGTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div2TotalGTime")
     private Float div2TotalGTime;
 
-    @Column(name = "Div2LongestGTime",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div2LongestGTime")
     private Float div2LongestGTime;
 
-    @Column(name = "Div2WheelsOff",  columnDefinition = "Nullable(Float32)")
+    @Column(name = "Div2WheelsOff")
     private Float div2WheelsOff;
 
     @Column(name = "Div2TailNum")
@@ -281,22 +280,22 @@ public class Ontime {
     @Column(name = "Div3Airport")
     private String div3Airport;
 
-    @Column(name = "Div3AirportID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3AirportID")
     private int div3AirportID;
 
-    @Column(name = "Div3AirportSeqID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3AirportSeqID")
     private int div3AirportSeqID;
 
-    @Column(name = "Div3WheelsOn",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3WheelsOn")
     private int div3WheelsOn;
 
-    @Column(name = "Div3TotalGTime",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3TotalGTime")
     private int div3TotalGTime;
 
-    @Column(name = "Div3LongestGTime",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3LongestGTime")
     private int div3LongestGTime;
 
-    @Column(name = "Div3WheelsOff",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div3WheelsOff")
     private int div3WheelsOff;
 
     @Column(name = "Div3TailNum")
@@ -305,22 +304,22 @@ public class Ontime {
     @Column(name = "Div4Airport")
     private String div4Airport;
 
-    @Column(name = "Div4AirportID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4AirportID")
     private int div4AirportID;
 
-    @Column(name = "Div4AirportSeqID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4AirportSeqID")
     private int div4AirportSeqID;
 
-    @Column(name = "Div4WheelsOn",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4WheelsOn")
     private int div4WheelsOn;
 
-    @Column(name = "Div4TotalGTime",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4TotalGTime")
     private int div4TotalGTime;
 
-    @Column(name = "Div4LongestGTime",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4LongestGTime")
     private int div4LongestGTime;
 
-    @Column(name = "Div4WheelsOff",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div4WheelsOff")
     private int div4WheelsOff;
 
     @Column(name = "Div4TailNum")
@@ -329,22 +328,22 @@ public class Ontime {
     @Column(name = "Div5Airport")
     private String div5Airport;
 
-    @Column(name = "Div5AirportID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5AirportID")
     private int div5AirportID;
 
-    @Column(name = "Div5AirportSeqID",  columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5AirportSeqID")
     private int div5AirportSeqID;
 
-    @Column(name = "Div5WheelsOn", columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5WheelsOn")
     private int div5WheelsOn;
 
-    @Column(name = "Div5TotalGTime", columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5TotalGTime")
     private int div5TotalGTime;
 
-    @Column(name = "Div5LongestGTime", columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5LongestGTime")
     private int div5LongestGTime;
 
-    @Column(name = "Div5WheelsOff", columnDefinition = "Nullable(Int32)")
+    @Column(name = "Div5WheelsOff")
     private int div5WheelsOff;
 
     @Column(name = "Div5TailNum")
