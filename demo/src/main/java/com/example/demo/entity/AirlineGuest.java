@@ -69,9 +69,9 @@ public class AirlineGuest implements Serializable {
         Random random = new Random();
         AirlineGuest guest = new AirlineGuest();
         guest.setEmail("Email");
-        guest.setName(UUID.randomUUID().toString().substring(0,10));
-        guest.setOrigin(AirportEnum.values()[random.nextInt((int)AirportEnum.values().length/2)]);
-        guest.setDest(AirportEnum.values()[AirportEnum.values().length/2 + random.nextInt(AirportEnum.values().length/2) -1 ]);
+        guest.setName(UUID.randomUUID().toString().substring(0, 10));
+        guest.setOrigin(AirportEnum.values()[random.nextInt((int) AirportEnum.values().length / 2)]);
+        guest.setDest(AirportEnum.values()[AirportEnum.values().length / 2 + random.nextInt(AirportEnum.values().length / 2) - 1]);
         guest.setReservations(Arrays.asList(UUID.randomUUID().toString()));
         guest.setDateColumn(java.sql.Date.from(Instant.ofEpochMilli(System.currentTimeMillis())));
         guest.setTimeColumn(Time.valueOf(LocalTime.MIDNIGHT));

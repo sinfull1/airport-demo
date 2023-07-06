@@ -39,4 +39,4 @@ CREATE TABLE trips
     pickup_ntaname    LowCardinality(String),
     dropoff_ntaname   LowCardinality(String)
 ) ENGINE = MergeTree
-PRIMARY KEY (pickup_datetime, dropoff_datetime);
+      PRIMARY KEY (pickup_datetime, dropoff_datetime);

@@ -22,8 +22,7 @@ public class GuestPersistor {
     @Bean
     public Function<byte[], Void> transactions() {
         return guest -> {
-            log.info("Processing order: " + guest);
-            System.out.println("Processing order: " + guest);
+            log.info("Processing order: " + SerializationUtils.deserialize(guest));
             airlineGuestRepo.save(SerializationUtils.deserialize(guest));
             return null;
         };

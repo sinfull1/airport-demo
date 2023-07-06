@@ -6,4 +6,5 @@ public interface EdgeListDao {
     String getDestination();
 
     Float getTimes();
+
 }
