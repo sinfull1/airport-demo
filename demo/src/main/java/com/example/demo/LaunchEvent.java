@@ -17,7 +17,9 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -70,9 +72,23 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         List<EdgeList> edgeList = ontimeRepo.getEdgeList().stream()
                 .map(EdgeList::builder).collect(Collectors.toList());
         edgeListRepo.saveAll(edgeList);
-        Utils.shortestPath(edgeList, "SFO", "DTW");
+        GraphSolver graphSolver = new GraphSolver(edgeList);
+        List<String> nodes = graphSolver.getAllNodes();
+        List<String> longest = null;
+        int largest = 0;
+        for (int i =0; i<nodes.size(); i ++) {
+            for (int j = 0; j<nodes.size(); j++) {
+                if (i!=j) {
+                  List<String> paths = graphSolver.shortestPathVertex(nodes.get(i), nodes.get(j));
+                  if (paths.size() > largest ) {
+                      largest = paths.size();
+                      longest = paths;
+                  }
+                }
+            }
 
-
+        }
+        System.out.println(longest.toString());
     }
 }
 
