@@ -5,9 +5,8 @@ import com.clickhouse.client.ClickHouseNode;
 import com.clickhouse.data.ClickHouseCompression;
 import com.clickhouse.data.ClickHouseFile;
 import com.clickhouse.data.ClickHouseFormat;
-import com.example.demo.repository.AirlineGuestRepo;
-import com.example.demo.repository.NewResultDao;
-import com.example.demo.repository.OntimeRepo;
+import com.example.demo.entity.EdgeList;
+import com.example.demo.repository.*;
 import org.hibernate.mapping.ClickHouseArrayMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
@@ -15,6 +14,7 @@ import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -26,16 +26,18 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     final StreamBridge streamBridge;
     final AirlineGuestRepo airlineGuestRepo;
     final OntimeRepo ontimeRepo;
+    final EdgeListRepo edgeListRepo;
 
     final static String FILE_NAME = "C:\\Users\\siddhary87\\Downloads\\newSample.csv";
     final static String TABLE_NAME = "ontime";
     final static String SERVER_NAME = "http://localhost:8123/default";
 
     @Autowired
-    public LaunchEvent(StreamBridge streamBridge, AirlineGuestRepo airlineGuestRepo, OntimeRepo ontimeRepo) {
+    public LaunchEvent(StreamBridge streamBridge, AirlineGuestRepo airlineGuestRepo, OntimeRepo ontimeRepo, EdgeListRepo edgeListRepo) {
         this.streamBridge = streamBridge;
         this.airlineGuestRepo = airlineGuestRepo;
         this.ontimeRepo = ontimeRepo;
+        this.edgeListRepo = edgeListRepo;
     }
 
     private void loadData(String server, String table, String fileName) {
@@ -68,8 +70,20 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
             System.out.println(ClickHouseArrayMapper.getOrderedIntegerSet(resultDao.getArrivals()));
             System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getTops()));
         }
+        List<EdgeListDao> edgeList = ontimeRepo.getEdgeList();
+        List<EdgeList> edges = new ArrayList<>();
+        for (EdgeListDao dao : edgeList) {
+            EdgeList edgeList1 = new EdgeList();
+            edgeList1.setOrigin(dao.getOrigin());
+            edgeList1.setDestination(dao.getDestination());
+            edgeList1.setTimes(dao.getTimes());
+            System.out.println(edgeList1.getOrigin() +" "+ edgeList1.getDestination() + " " + edgeList1.getTimes());
+        }
+        edgeListRepo.saveAll(edges);
     }
 }
+
+
 
 
 

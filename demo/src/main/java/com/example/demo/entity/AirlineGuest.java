@@ -5,6 +5,7 @@ import io.hypersistence.utils.hibernate.type.array.ListArrayType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
@@ -34,6 +35,7 @@ public class AirlineGuest implements Serializable {
     private String email;
 
     @Column(name = "phone")
+    @ColumnDefault("999999999")
     private String phone;
 
     @Column(name = "dateColumn", nullable = false)
