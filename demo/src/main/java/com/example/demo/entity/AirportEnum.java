@@ -2,7 +2,6 @@ package com.example.demo.entity;
 
 public enum AirportEnum {
     IAH,
-
     EWR,
     PHX,
     ORD,

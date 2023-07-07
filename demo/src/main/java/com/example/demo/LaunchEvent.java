@@ -11,12 +11,16 @@ import com.example.demo.repository.EdgeListRepo;
 import com.example.demo.repository.NewResultDao;
 import com.example.demo.repository.OntimeRepo;
 import org.hibernate.mapping.ClickHouseArrayMapper;
+import org.jgrapht.alg.ConnectivityInspector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +37,6 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     final OntimeRepo ontimeRepo;
     final EdgeListRepo edgeListRepo;
 
-    final static String FILE_NAME = "C:\\Users\\micro\\Downloads\\newSample.csv";
     final static String TABLE_NAME = "ontime";
     final static String SERVER_NAME = "http://localhost:8123/default";
 
@@ -45,13 +48,15 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         this.edgeListRepo = edgeListRepo;
     }
 
-    private void loadData(String server, String table, String fileName) {
+    private void loadData(String server, String table, String fileName) throws FileNotFoundException {
+        File file = ResourceUtils.getFile("classpath:"+fileName);
         try {
             ClickHouseClient.load(
                     ClickHouseNode.of(server),
                     table,
-                    ClickHouseFile.of(fileName,
-                            ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames)).get();
+                    ClickHouseFile.of(file,
+                            ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames)).get();
+
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -59,18 +64,14 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
-
-        loadData(SERVER_NAME, TABLE_NAME, FILE_NAME);
-        List<NewResultDao> analysis = ontimeRepo.getAnalysis();
-        for (NewResultDao resultDao : analysis) {
-            System.out.println(resultDao.getAirline() + " " + resultDao.getFlightDate() + " " + resultDao.getTailNumber());
-            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getOrigins()));
-            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getGroups()));
-            System.out.println(ClickHouseArrayMapper.getOrderedIntegerSet(resultDao.getArrivals()));
-            System.out.println(ClickHouseArrayMapper.getOrderedStringSet(resultDao.getTops()));
+        try {
+            loadData(SERVER_NAME, TABLE_NAME, "newSample.gz");
+          //  loadData(SERVER_NAME, TABLE_NAME, "newSample1.gz");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
         }
-        List<EdgeList> edgeList = ontimeRepo.getEdgeList().stream()
-                .map(EdgeList::builder).collect(Collectors.toList());
+
+        List<EdgeList> edgeList = ontimeRepo.getEdgeList().stream().map(EdgeList::builder).collect(Collectors.toList());
         edgeListRepo.saveAll(edgeList);
         GraphSolver graphSolver = new GraphSolver(edgeList);
         List<String> nodes = graphSolver.getAllNodes();
@@ -86,10 +87,10 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
                   }
                 }
             }
-
         }
-        System.out.println(longest.toString());
+        System.out.println(graphSolver.connectedComponents().toString());
     }
+
 }
 
 

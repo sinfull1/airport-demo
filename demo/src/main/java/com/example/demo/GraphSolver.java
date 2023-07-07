@@ -3,8 +3,10 @@ package com.example.demo;
 import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomWeightEdge;
 import lombok.extern.slf4j.Slf4j;
+import org.jgrapht.DirectedGraph;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
+import org.jgrapht.alg.ConnectivityInspector;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
@@ -18,8 +20,10 @@ import java.util.Set;
 public class GraphSolver {
 
     DijkstraShortestPath<String, CustomWeightEdge> shortestPathAlgorithm ;
-    Graph<String, CustomWeightEdge>  graph ;
+    DirectedGraph<String, CustomWeightEdge> graph ;
     List<EdgeList> edgeList = null;
+
+    ConnectivityInspector ci = null;
     public GraphSolver(List<EdgeList> edgeList) {
           this.edgeList = edgeList;
           this.init();
@@ -34,6 +38,7 @@ public class GraphSolver {
             weightedEdge.setWeight(edge.getTimes());
         }
         shortestPathAlgorithm = new DijkstraShortestPath<>(graph);
+        ci = new ConnectivityInspector(graph);
     }
 
     public List<String> getAllNodes() {
@@ -53,6 +58,10 @@ public class GraphSolver {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public List<Set> connectedComponents() {
+        return ci.connectedSets();
     }
 
 }
