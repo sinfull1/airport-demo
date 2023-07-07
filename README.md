@@ -1,3 +1,6 @@
+
+## Sample project for using clickhouse with hibenrate 6 and kafka
+
 Sample repository example to demonstrate few things:
 
 1. Loading data from file into Clickhouse
@@ -15,7 +18,17 @@ We build two API
 1. /getMaxHops  -> Return the max hops source airport and destination airport in the data
 2. /path/shortest/{origin}/{dest}   - give the shortest flight path between two airports
 
+Clickhouse dialect inclusion
+
+        <dependency>
+            <groupId>io.github.sinfull1</groupId>
+            <artifactId>hibernate6-clickhouse-dialect</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
 Hibernate 
+
     @Query(value = "SELECT o.flightDate as flightDate, o.reportingAirline as airline, o.tailNumber as tailNumber,\n" +
             "    arraySort(groupArray(o.arrTime)) AS arrivals, " +
             "    arraySort('(x, y) -> y', groupArray(o.origin), groupArray(o.arrTime)) AS origins, " +
