@@ -1,9 +1,0 @@
-{
-  "properties": [
-    {
-      "name": "spring.cloud.stream.kafka.binder.brokers",
-      "type": "java.lang.String",
-      "description": "Description for spring.cloud.stream.kafka.binder.brokers."
-    }
-  ]
-}
