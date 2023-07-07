@@ -23,11 +23,14 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             "  ORDER BY flightDate, airline, tailNumber LIMIT 10")
     List<NewResultDao> getAnalysis();
 
-    @Query(value = "SELECT o.origin as origin, o.dest as destination, " +
+    @Query(value = "SELECT o.origin as origin, " +
+            " o.originCityName as origCity, " +
+            " o.dest as destination, " +
+            " o.destCityName as destCity, " +
             "  arrayAvg(groupArray(o.arrTime - o.depTime)) as times " +
             "  FROM Ontime o" +
             "  WHERE o.depTime < o.arrTime " +
-            "  GROUP BY origin, destination " +
-            "  ORDER BY origin, destination")
+            "  GROUP BY origin, origCity, destination, destCity " +
+            "  ORDER BY origin, origCity, destination, destCity")
     List<EdgeListDao> getEdgeList();
 }
