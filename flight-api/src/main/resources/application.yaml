@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   sql:
@@ -35,7 +35,7 @@ spring:
 
   cloud:
     function:
-      definition: transactions
+      definition: persist
     stream:
       kafka:
         binder:
@@ -49,12 +49,12 @@ spring:
 
       default-binder: kafka
       bindings:
-        orderBuySupplier-out-0:
+        airline-user-out-0:
           destination: orders-buy-1
           producer:
             timeout: 10000
             partition-count: 1
-        transactions-in-0:
+        persist-in-0:
           destination: orders-buy-1
           group: transactions
           consumer:

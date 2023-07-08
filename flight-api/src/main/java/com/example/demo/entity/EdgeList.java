@@ -50,7 +50,8 @@ public class EdgeList {
     public CustomNode getOriginNode() {
         return new CustomNode(this.origin, this.originCity);
     }
-    public CustomNode getDestNode(){
+
+    public CustomNode getDestNode() {
         return new CustomNode(this.destination, this.destCity);
     }
 }

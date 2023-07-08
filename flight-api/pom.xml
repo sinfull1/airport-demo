@@ -14,11 +14,16 @@
     <name>demo</name>
     <description>Demo project for Spring Boot</description>
     <properties>
-        <java.version>17</java.version>
         <spring-cloud.version>2022.0.1</spring-cloud.version>
+        <java.version>17</java.version>
+        <clickhouse-jdbc.version>0.4.2</clickhouse-jdbc.version>
+        <hibernate.version>6.2.2.Final</hibernate.version>
+        <jgrapht.version>1.5.2</jgrapht.version>
+        <log4j.version>2.17.0</log4j.version>
+        <flatbuffer.version>23.1.4</flatbuffer.version>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
+        <hypersistence.version>3.4.1</hypersistence.version>
     </properties>
-
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -39,12 +44,12 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.0.1</version>
+            <version>${jgrapht.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
-            <version>3.12.0</version>
+            <version>${commons-lang3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -73,27 +78,29 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>6.2.2.Final</version>
+            <version>${hibernate.version}</version>
         </dependency>
         <dependency>
             <groupId>com.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
-            <version>0.4.6</version>
+            <version>${clickhouse-jdbc.version}</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-utils-hibernate-62</artifactId>
-            <version>3.4.1</version>
+            <version>${hypersistence.version}</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.google.flatbuffers</groupId>
+            <artifactId>flatbuffers-java</artifactId>
+            <version>${flatbuffer.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.flatbuffers</groupId>
             <artifactId>flatbuffers-java</artifactId>
-            <version>23.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.flatbuffers</groupId>
-            <artifactId>flatbuffers-java</artifactId>
-            <version>23.1.4</version>
+            <version>${flatbuffer.version}</version>
         </dependency>
 
         <dependency>

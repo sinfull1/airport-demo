@@ -12,16 +12,21 @@ import java.util.List;
 public interface OntimeRepo extends CrudRepository<Ontime, String> {
 
 
-    @Query(value = "SELECT o.flightDate as flightDate, o.reportingAirline as airline, o.tailNumber as tailNumber,\n" +
-            "    arraySort(groupArray(o.arrTime)) AS arrivals, " +
-            "    arraySort('(x, y) -> y', groupArray(o.origin), groupArray(o.arrTime)) AS origins, " +
-            "    groupArray(1, o.dest) AS groups, " +
-            "    topK(3, o.dest) AS tops " +
-            "  FROM Ontime o" +
-            "  WHERE o.depTime < o.arrTime " +
-            "  GROUP BY flightDate, airline, tailNumber " +
-            "  ORDER BY flightDate, airline, tailNumber LIMIT 10")
-    List<NewResultDao> getAnalysis();
+    @Query(value =
+
+            " SELECT o.flightDate as flightDate, o.reportingAirline as airline, o.tailNumber as tailNumber, " +
+                    "    arraySort(groupArray(o.arrTime)) AS arrivals, " +
+                    "    arraySort(groupArray(o.depTime)) AS departures, " +
+                    "    arraySort('(x, y) -> y', groupArray(o.origin), groupArray(o.arrTime)) AS origins, " +
+                    "    arraySort('(x, y) -> y', groupArray(o.dest), groupArray(o.arrTime)) AS dests, " +
+                    "    length(groupArray(o.depTime)) AS hops " +
+                    "  FROM Ontime o" +
+                    "  WHERE o.depTime < o.arrTime " +
+                    "  GROUP BY flightDate, airline, tailNumber " +
+                    "  ORDER BY hops DESC, airline, tailNumber LIMIT 10 "
+
+    )
+    List<AnalysisResultDao> getAnalysis();
 
     @Query(value = "SELECT o.origin as origin, " +
             " o.originCityName as origCity, " +

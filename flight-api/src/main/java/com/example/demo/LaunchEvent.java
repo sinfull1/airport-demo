@@ -63,8 +63,10 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
-            loadData(SERVER_NAME, TABLE_NAME, "newSample.gz");
-            loadData(SERVER_NAME, TABLE_NAME, "newSample1.gz");
+            loadData(SERVER_NAME, TABLE_NAME, "flight1.gz");
+            loadData(SERVER_NAME, TABLE_NAME, "flight2.gz");
+            loadData(SERVER_NAME, TABLE_NAME, "flight3.gz");
+            loadData(SERVER_NAME, TABLE_NAME, "flight4.gz");
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
