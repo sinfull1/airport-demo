@@ -1,7 +1,10 @@
 package com.example.demo;
 
+import com.example.demo.entity.Carrier;
 import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomNode;
+import com.example.demo.graph.CustomWeightEdge;
+import com.example.demo.repository.CarrierRepo;
 import com.example.demo.repository.EdgeListRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.jgrapht.Graph;
@@ -12,7 +15,7 @@ import org.jgrapht.alg.interfaces.StrongConnectivityAlgorithm;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-import org.jgrapht.graph.DefaultWeightedEdge;
+
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -22,18 +25,25 @@ import java.util.*;
 @Component
 @Slf4j
 public class GraphSolver {
-    StrongConnectivityAlgorithm<CustomNode, DefaultWeightedEdge> scAlg;
+    StrongConnectivityAlgorithm<CustomNode, CustomWeightEdge> scAlg;
 
-    DijkstraShortestPath<CustomNode, DefaultWeightedEdge> shortestPathAlgorithm;
-    AllDirectedPaths<CustomNode, DefaultWeightedEdge> allPaths;
-    DefaultDirectedWeightedGraph<CustomNode, DefaultWeightedEdge> graph;
+    DijkstraShortestPath<CustomNode, CustomWeightEdge> shortestPathAlgorithm;
+    AllDirectedPaths<CustomNode, CustomWeightEdge> allPaths;
+    DefaultDirectedWeightedGraph<CustomNode, CustomWeightEdge> graph;
     Map<String, String> cityCodeToNameMap = new HashMap<>();
-    ConnectivityInspector<CustomNode, DefaultWeightedEdge> ci = null;
+    ConnectivityInspector<CustomNode, CustomWeightEdge> ci = null;
     HashSet<CustomNode> nodeSet = null;
     final EdgeListRepo edgeListRepo;
 
-    public GraphSolver(EdgeListRepo edgeListRepo) {
+
+
+    static final Map<String, String> codeToAirline = new HashMap<>();
+
+    final CarrierRepo carrierRepo;
+
+    public GraphSolver(EdgeListRepo edgeListRepo, CarrierRepo carrierRepo) {
         this.edgeListRepo = edgeListRepo;
+        this.carrierRepo = carrierRepo;
     }
 
     protected void init() {
@@ -45,12 +55,21 @@ public class GraphSolver {
             nodeSet.add(new CustomNode(edgeList1.getOrigin(), edgeList1.getOriginCity()));
             nodeSet.add(new CustomNode(edgeList1.getDestination(), edgeList1.getDestCity()));
         }
-        graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+        graph = new DefaultDirectedWeightedGraph<>(CustomWeightEdge.class);
         for (EdgeList edge : tempEdgeList) {
-            graph.addVertex(edge.getOriginNode());
-            graph.addVertex(edge.getDestNode());
-            DefaultWeightedEdge weightedEdge = graph.addEdge(edge.getOriginNode(), edge.getDestNode());
-            graph.setEdgeWeight(weightedEdge, edge.getTimes());
+            if ( edge.getTimes() != null) {
+                graph.addVertex(edge.getOriginNode());
+                graph.addVertex(edge.getDestNode());
+                CustomWeightEdge weightedEdge = graph.addEdge(edge.getOriginNode(), edge.getDestNode());
+                weightedEdge.setAirline(edge.getAirline());
+                weightedEdge.setWeight(edge.getTimes());
+                if (weightedEdge != null ) {
+                    graph.setEdgeWeight(weightedEdge, edge.getTimes());
+                }
+            }
+        }
+        for (Carrier carrier : carrierRepo.findAll()) {
+            codeToAirline.put(carrier.getCode(), carrier.getAirline());
         }
         shortestPathAlgorithm = new DijkstraShortestPath<>(graph);
         allPaths = new AllDirectedPaths<>(graph);
@@ -62,21 +81,21 @@ public class GraphSolver {
     }
 
     @Cacheable("spaths")
-    public List<CustomNode> shortestPathVertex(CustomNode origin, CustomNode destination) {
-        GraphPath<CustomNode, DefaultWeightedEdge> shortestPath = shortestPathAlgorithm.getPath(origin, destination);
+    public GraphPath<CustomNode, CustomWeightEdge> shortestPathVertex(CustomNode origin, CustomNode destination) {
+        GraphPath<CustomNode, CustomWeightEdge> shortestPath = shortestPathAlgorithm.getPath(origin, destination);
         if (shortestPath != null) {
-            return shortestPath.getVertexList();
+            return shortestPath;
         } else {
-            return Collections.emptyList();
+            return null;
         }
     }
     public List<List<CustomNode>> getAllPath(CustomNode origin, CustomNode destination) {
-        List<GraphPath<CustomNode, DefaultWeightedEdge>> allPath =
+        List<GraphPath<CustomNode, CustomWeightEdge>> allPath =
                 allPaths.getAllPaths(origin, destination, true, null);
 
         if (allPath != null) {
             List<List<CustomNode>> allPathLists = new ArrayList<>();
-            for (GraphPath<CustomNode, DefaultWeightedEdge> path : allPath) {
+            for (GraphPath<CustomNode, CustomWeightEdge> path : allPath) {
                 allPathLists.add(path.getVertexList());
             }
             return allPathLists;
@@ -88,11 +107,14 @@ public class GraphSolver {
         return cityCodeToNameMap.get(key);
     }
 
+    public static String getCodeToAirline(String key) {
+        return codeToAirline.get(key);
+    }
     public  List<Set<CustomNode>> connectComponents( ) {
         List<Set<CustomNode>> customNodes = new ArrayList<>();
 
-        List<Graph<CustomNode, DefaultWeightedEdge>>  scs =  scAlg.getStronglyConnectedComponents();
-        for (Graph<CustomNode, DefaultWeightedEdge> subGraph: scs) {
+        List<Graph<CustomNode, CustomWeightEdge>>  scs =  scAlg.getStronglyConnectedComponents();
+        for (Graph<CustomNode, CustomWeightEdge> subGraph: scs) {
             customNodes.add(subGraph.vertexSet());
         }
         return customNodes;

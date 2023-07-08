@@ -32,7 +32,8 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             " o.originCityName as origCity, " +
             " o.dest as destination, " +
             " o.destCityName as destCity, " +
-            "  arrayAvg(groupArray(o.arrTime - o.depTime)) as times " +
+            " arrayReduce('groupUniqArray', groupArray(o.iataCodeReportingAirline)) as airline, " +
+            " arrayAvg(groupArray(o.arrTime - o.depTime)) as times " +
             "  FROM Ontime o" +
             "  WHERE o.depTime < o.arrTime " +
             "  GROUP BY origin, origCity, destination, destCity " +

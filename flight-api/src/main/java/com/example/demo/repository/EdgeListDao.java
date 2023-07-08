@@ -9,6 +9,8 @@ public interface EdgeListDao {
 
     String getDestCity();
 
+    Object[] getAirline();
+
     Float getTimes();
 
 }

@@ -1,22 +1,26 @@
 package com.example.demo;
 
 import com.example.demo.dto.AnalysisResultDto;
+import com.example.demo.dto.MaxHopResultDto;
 import com.example.demo.dto.Path;
+import com.example.demo.entity.Carrier;
 import com.example.demo.graph.CustomNode;
+import com.example.demo.graph.CustomWeightEdge;
 import com.example.demo.repository.AirlineGuestRepo;
 import com.example.demo.repository.AnalysisResultDao;
+import com.example.demo.repository.CarrierRepo;
 import com.example.demo.repository.OntimeRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.mapping.ClickHouseArrayMapper;
+import org.jgrapht.GraphPath;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -27,36 +31,64 @@ public class AnalyticsQueryController {
     final GraphSolver graphSolver;
     final OntimeRepo ontimeRepo;
 
+    final CarrierRepo carrierRepo;
+
+
+
     public AnalyticsQueryController(StreamBridge streamBridge,
                                     AirlineGuestRepo airlineGuestRepo,
-                                    GraphSolver graphSolver, OntimeRepo ontimeRepo) {
+                                    GraphSolver graphSolver, OntimeRepo ontimeRepo, CarrierRepo carrierRepo) {
         this.streamBridge = streamBridge;
         this.airlineGuestRepo = airlineGuestRepo;
         this.graphSolver = graphSolver;
         this.ontimeRepo = ontimeRepo;
+        this.carrierRepo = carrierRepo;
+
+    }
+
+    private void init() {
+
     }
 
     @GetMapping("/getMaxHops")
-    public Mono<List<CustomNode>> maxHops() {
+    public Mono<  List<MaxHopResultDto> > maxHops() {
         List<CustomNode> nodes = graphSolver.getAllNodes();
         List<CustomNode> longest = null;
+        List<CustomWeightEdge> longestEdges = null;
         int largest = 0;
         for (int i = 0; i < nodes.size(); i++) {
             for (int j = 0; j < nodes.size(); j++) {
                 if (i != j) {
-                    List<CustomNode> paths = graphSolver.shortestPathVertex(nodes.get(i), nodes.get(j));
-                    if (paths.size() > largest) {
-                        largest = paths.size();
-                        longest = paths;
+                    GraphPath<CustomNode, CustomWeightEdge> paths = graphSolver.shortestPathVertex(nodes.get(i), nodes.get(j));
+                    if (paths.getVertexList().size() > largest) {
+                        largest = paths.getVertexList().size();
+                        longest = paths.getVertexList();
+                        longestEdges = paths.getEdgeList();
                     }
                 }
             }
         }
-        return Mono.just(longest);
+
+        return Mono.just(craftResponse(longest, longestEdges));
+    }
+
+    private  List<MaxHopResultDto> craftResponse(List<CustomNode> longest, List<CustomWeightEdge> longestEdges) {
+        int length = longest.size();
+        List<MaxHopResultDto> maxHopResultDtos = new ArrayList<>();
+        for (int i =0 ;i< length-1; i++) {
+            MaxHopResultDto maxHopResultDto =  new MaxHopResultDto();
+            maxHopResultDto.setSource(longest.get(i));
+            maxHopResultDto.setDestination(longest.get(i+1));
+            maxHopResultDto.setFlightTime(longestEdges.get(i).getWeight());
+            maxHopResultDto.setAirlines(longestEdges.get(i).getAirline().stream().map(GraphSolver::getCodeToAirline).toList());
+            maxHopResultDtos.add(maxHopResultDto);
+
+        }
+        return maxHopResultDtos;
     }
 
     @GetMapping("/path/shortest/{origin}/{dest}")
-    public Mono<List<CustomNode>> shortestPath(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
+    public Mono<GraphPath<CustomNode, CustomWeightEdge>> shortestPath(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
         return Mono.just(graphSolver.shortestPathVertex(new CustomNode(origin, graphSolver.getValue(origin))
                 , new CustomNode(dest, graphSolver.getValue(dest))));
     }

@@ -46,14 +46,16 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         this.graphSolver = graphSolver;
     }
 
-    private void loadData(String server, String table, String fileName) throws FileNotFoundException {
+    private void loadData(String server, String table, String fileName,
+                          ClickHouseCompression compression, int level,
+                          ClickHouseFormat format) throws FileNotFoundException {
         File file = ResourceUtils.getFile("classpath:" + fileName);
         try {
             ClickHouseClient.load(
                     ClickHouseNode.of(server),
                     table,
                     ClickHouseFile.of(file,
-                            ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames)).get();
+                            compression, level, format)).get();
 
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
@@ -63,10 +65,11 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
-            loadData(SERVER_NAME, TABLE_NAME, "flight1.gz");
-            loadData(SERVER_NAME, TABLE_NAME, "flight2.gz");
-            loadData(SERVER_NAME, TABLE_NAME, "flight3.gz");
-            loadData(SERVER_NAME, TABLE_NAME, "flight4.gz");
+            loadData(SERVER_NAME, "carrier", "carriers.csv", ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames);
+            loadData(SERVER_NAME, TABLE_NAME, "flight1.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+            loadData(SERVER_NAME, TABLE_NAME, "flight2.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+            loadData(SERVER_NAME, TABLE_NAME, "flight3.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+            loadData(SERVER_NAME, TABLE_NAME, "flight4.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
