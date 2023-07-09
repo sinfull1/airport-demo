@@ -39,4 +39,19 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             "  GROUP BY origin, origCity, destination, destCity " +
             "  ORDER BY origin, origCity, destination, destCity")
     List<EdgeListDao> getEdgeList();
+
+    @Query(value =
+
+            " SELECT o.origin as origin, " +
+            " o.originCityName as origCity, " +
+            " o.dest as destination, " +
+            " o.destCityName as destCity, " +
+            " arraySort(groupArray(toUInt64(toDateTime(o.flightDate, 'UTC')) + toUInt64(o.arrTime/100)*60*60 + (modulo(o.arrTime,100)*60)))  as arrTimes, " +
+            " arraySort('(x, y) -> y',groupArray(o.iataCodeReportingAirline), groupArray(toUInt64(toDateTime(o.flightDate, 'UTC')) + toUInt64(o.arrTime/100)*60*60 + (modulo(o.arrTime,100)*60))) as airline, " +
+            " arraySort('(x, y) -> y',groupArray(toUInt64(toDateTime(o.flightDate, 'UTC')) + toUInt64(o.depTime/100)*60*60 + (modulo(o.depTime,100)*60)), groupArray(toUInt64(toDateTime(o.flightDate, 'UTC')) + toUInt64(o.arrTime/100)*60*60 + (modulo(o.arrTime,100)*60))) as depTimes " +
+            "  FROM Ontime o" +
+            "  WHERE o.depTime < o.arrTime " +
+            "  group BY 1, 2, 3, 4 " +
+            "  ORDER BY 1, 3, 6, 7")
+    List<EdgeListDeps> getEdgeListWithDeps();
 }

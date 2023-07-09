@@ -5,17 +5,22 @@ import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
 import com.example.demo.repository.CarrierRepo;
+import com.example.demo.repository.EdgeListDeps;
 import com.example.demo.repository.EdgeListRepo;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.mapping.ClickHouseArrayMapper;
 import org.jgrapht.Graph;
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.connectivity.ConnectivityInspector;
 import org.jgrapht.alg.connectivity.KosarajuStrongConnectivityInspector;
 import org.jgrapht.alg.interfaces.StrongConnectivityAlgorithm;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
+import org.jgrapht.alg.shortestpath.BellmanFordShortestPath;
 import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
+import org.jgrapht.graph.DirectedWeightedMultigraph;
+import org.jgrapht.traverse.TopologicalOrderIterator;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
@@ -26,19 +31,15 @@ import java.util.*;
 @Slf4j
 public class GraphSolver {
     StrongConnectivityAlgorithm<CustomNode, CustomWeightEdge> scAlg;
-
-    DijkstraShortestPath<CustomNode, CustomWeightEdge> shortestPathAlgorithm;
+    TopologicalOrderIterator<CustomNode, CustomWeightEdge> moreDependencyFirstIterator;
+    BellmanFordShortestPath<CustomNode, CustomWeightEdge> shortestPathAlgorithm;
     AllDirectedPaths<CustomNode, CustomWeightEdge> allPaths;
-    DefaultDirectedWeightedGraph<CustomNode, CustomWeightEdge> graph;
+    DirectedWeightedMultigraph<CustomNode, CustomWeightEdge> graph;
     Map<String, String> cityCodeToNameMap = new HashMap<>();
     ConnectivityInspector<CustomNode, CustomWeightEdge> ci = null;
     HashSet<CustomNode> nodeSet = null;
     final EdgeListRepo edgeListRepo;
-
-
-
     static final Map<String, String> codeToAirline = new HashMap<>();
-
     final CarrierRepo carrierRepo;
 
     public GraphSolver(EdgeListRepo edgeListRepo, CarrierRepo carrierRepo) {
@@ -46,34 +47,37 @@ public class GraphSolver {
         this.carrierRepo = carrierRepo;
     }
 
-    protected void init() {
-        Iterable<EdgeList> tempEdgeList = edgeListRepo.findAll();
+    protected void init(List<EdgeListDeps> edgeLists) {
+
+        graph = new DirectedWeightedMultigraph<>(CustomWeightEdge.class);
         nodeSet = new HashSet<>();
-        for (EdgeList edgeList1 : tempEdgeList) {
-            cityCodeToNameMap.putIfAbsent(edgeList1.getOrigin(), edgeList1.getDestCity());
-            cityCodeToNameMap.putIfAbsent(edgeList1.getDestination(), edgeList1.getDestCity());
-            nodeSet.add(new CustomNode(edgeList1.getOrigin(), edgeList1.getOriginCity()));
-            nodeSet.add(new CustomNode(edgeList1.getDestination(), edgeList1.getDestCity()));
+        for (EdgeListDeps edge : edgeLists) {
+            cityCodeToNameMap.putIfAbsent(edge.getOrigin(), edge.getDestCity());
+            cityCodeToNameMap.putIfAbsent(edge.getDestination(), edge.getDestCity());
+            nodeSet.add(new CustomNode(edge.getOrigin(), edge.getOriginCity()));
+            nodeSet.add(new CustomNode(edge.getDestination(), edge.getDestCity()));
         }
-        graph = new DefaultDirectedWeightedGraph<>(CustomWeightEdge.class);
-        for (EdgeList edge : tempEdgeList) {
-            if ( edge.getTimes() != null) {
+        for (EdgeListDeps edge : edgeLists) {
                 graph.addVertex(edge.getOriginNode());
                 graph.addVertex(edge.getDestNode());
-                CustomWeightEdge weightedEdge = graph.addEdge(edge.getOriginNode(), edge.getDestNode());
-                weightedEdge.setAirline(edge.getAirline());
-                weightedEdge.setWeight(edge.getTimes());
-                if (weightedEdge != null ) {
-                    graph.setEdgeWeight(weightedEdge, edge.getTimes());
+                List<String> airlines = ClickHouseArrayMapper.getOrderedStringSet(edge.getAirline());
+                List<Integer> arrTimes = ClickHouseArrayMapper.getOrderedIntegerSet(edge.getArrTimes());
+                List<Integer> depTimes = ClickHouseArrayMapper.getOrderedIntegerSet(edge.getDepTimes());
+                for (int i =0; i< airlines.size(); i++) {
+                    CustomWeightEdge weightedEdge = graph.addEdge(edge.getOriginNode(), edge.getDestNode());
+                    weightedEdge.setAirline(airlines.get(i));
+                    weightedEdge.setStartTime(depTimes.get(i));
+                    weightedEdge.setEndTime(arrTimes.get(i));
+                    graph.setEdgeWeight(weightedEdge, arrTimes.get(i) - depTimes.get(i));
                 }
-            }
         }
         for (Carrier carrier : carrierRepo.findAll()) {
             codeToAirline.put(carrier.getCode(), carrier.getAirline());
         }
-        shortestPathAlgorithm = new DijkstraShortestPath<>(graph);
+        shortestPathAlgorithm = new BellmanFordShortestPath<>(graph);
         allPaths = new AllDirectedPaths<>(graph);
         scAlg = new KosarajuStrongConnectivityInspector<>(graph);
+        moreDependencyFirstIterator = new TopologicalOrderIterator<>(graph);
     }
 
     public List<CustomNode> getAllNodes() {
@@ -118,5 +122,9 @@ public class GraphSolver {
             customNodes.add(subGraph.vertexSet());
         }
         return customNodes;
+    }
+
+    public void getTopologyOrder() {
+        moreDependencyFirstIterator.forEachRemaining(x->System.out.print(x.getCity()));
     }
 }

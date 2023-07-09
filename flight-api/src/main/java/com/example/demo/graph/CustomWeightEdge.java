@@ -7,25 +7,38 @@ import java.util.List;
 
 public class CustomWeightEdge extends DefaultWeightedEdge {
 
+    String airline;
+    int startTime;
+    int endTime;
+    public void setAirline(String airline) {
+        this.airline = airline;
+    }
 
-    double weight;
-    List<String> airline;
+    public int getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(int startTime) {
+        this.startTime = startTime;
+    }
+
+    public int getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(int endTime) {
+        this.endTime = endTime;
+    }
 
     @Override
     public double getWeight() {
-        return weight;
+        return super.getWeight();
     }
 
-    public List<String> getAirline() {
+    public String getAirline() {
         return airline;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
-    }
 
-    public void setAirline(List<String> airline) {
-        this.airline = airline;
-    }
 
 }

@@ -80,9 +80,8 @@ public class AnalyticsQueryController {
             maxHopResultDto.setSource(longest.get(i));
             maxHopResultDto.setDestination(longest.get(i+1));
             maxHopResultDto.setFlightTime(longestEdges.get(i).getWeight());
-            maxHopResultDto.setAirlines(longestEdges.get(i).getAirline().stream().map(GraphSolver::getCodeToAirline).toList());
+        //    maxHopResultDto.setAirlines(longestEdges.get(i).getAirline().stream().map(GraphSolver::getCodeToAirline).toList());
             maxHopResultDtos.add(maxHopResultDto);
-
         }
         return maxHopResultDtos;
     }
@@ -129,6 +128,12 @@ public class AnalyticsQueryController {
     @GetMapping("/all")
     public Mono<List<CustomNode>> allAirports() {
         return Mono.just(graphSolver.getAllNodes());
+    }
+
+    @GetMapping("/topo")
+    public Mono<Void> topo() {
+        graphSolver.getTopologyOrder();
+        return null;
     }
 
     @GetMapping("/connected")

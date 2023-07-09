@@ -62,8 +62,8 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         }
     }
 
-    @Override
-    public void onApplicationEvent(ApplicationStartedEvent event) {
+
+    public void ApplicationEvent(ApplicationStartedEvent event) {
         try {
             loadData(SERVER_NAME, "carrier", "carriers.csv", ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames);
             loadData(SERVER_NAME, TABLE_NAME, "flight1.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
@@ -75,7 +75,21 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         }
         List<EdgeList> edgeList = ontimeRepo.getEdgeList().stream().map(EdgeList::builder).collect(Collectors.toList());
         edgeListRepo.saveAll(edgeList);
-        graphSolver.init();
+      //  graphSolver.init();
+    }
+    @Override
+    public void onApplicationEvent(ApplicationStartedEvent event) {
+        try {
+            loadData(SERVER_NAME, "carrier", "carriers.csv", ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames);
+            loadData(SERVER_NAME, TABLE_NAME, "flight1.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+        //    loadData(SERVER_NAME, TABLE_NAME, "flight2.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+        //    loadData(SERVER_NAME, TABLE_NAME, "flight3.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+        //    loadData(SERVER_NAME, TABLE_NAME, "flight4.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+     //  edgeListRepo.saveAll(edgeList);
+        graphSolver.init(ontimeRepo.getEdgeListWithDeps());
     }
 }
 

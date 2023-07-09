@@ -58,7 +58,16 @@ public class EdgeList {
         edgeList.setDestCity(edgeListDao.getDestCity());
         return edgeList;
     }
-
+    public static EdgeList builderV2(EdgeListDao edgeListDao) {
+        EdgeList edgeList = new EdgeList();
+        edgeList.setOrigin(edgeListDao.getOrigin());
+        edgeList.setTimes(edgeListDao.getTimes());
+        edgeList.setDestination(edgeListDao.getDestination());
+        edgeList.setOriginCity(edgeListDao.getOrigCity());
+        edgeList.setAirline(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getAirline()));
+        edgeList.setDestCity(edgeListDao.getDestCity());
+        return edgeList;
+    }
 
     public CustomNode getOriginNode() {
         return new CustomNode(this.origin, this.originCity);

@@ -10,7 +10,6 @@ import java.util.Objects;
 @AllArgsConstructor
 public class CustomNode {
     private String code;
-    private String city;
 
     @Override
     public boolean equals(Object o) {
@@ -19,11 +18,14 @@ public class CustomNode {
 
         CustomNode that = (CustomNode) o;
 
-        return Objects.equals(code, that.code);
+        return code.equals(that.code);
     }
 
     @Override
     public int hashCode() {
-        return code != null ? code.hashCode() : 0;
+        return code.hashCode();
     }
+
+    private String city;
+
 }
