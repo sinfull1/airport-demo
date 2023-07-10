@@ -14,7 +14,7 @@ public class GuestProducer {
         this.streamBridge = streamBridge;
     }
 
-    @Scheduled(fixedDelay = 4000)
+    @Scheduled(fixedDelay = 400000)
     public void createAirlineUser() {
         streamBridge.send("airline-user-out-0",
                 SerializationUtils.serialize(AirlineGuest.getRandomGuest()));

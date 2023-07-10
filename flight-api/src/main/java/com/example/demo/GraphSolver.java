@@ -5,7 +5,7 @@ import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
 import com.example.demo.repository.CarrierRepo;
-import com.example.demo.repository.EdgeListDeps;
+import com.example.demo.repository.EdgeListDao;
 import com.example.demo.repository.EdgeListRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.mapping.ClickHouseArrayMapper;
@@ -16,8 +16,6 @@ import org.jgrapht.alg.connectivity.KosarajuStrongConnectivityInspector;
 import org.jgrapht.alg.interfaces.StrongConnectivityAlgorithm;
 import org.jgrapht.alg.shortestpath.AllDirectedPaths;
 import org.jgrapht.alg.shortestpath.BellmanFordShortestPath;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 
 import org.jgrapht.graph.DirectedWeightedMultigraph;
 import org.jgrapht.traverse.TopologicalOrderIterator;
@@ -47,17 +45,17 @@ public class GraphSolver {
         this.carrierRepo = carrierRepo;
     }
 
-    protected void init(List<EdgeListDeps> edgeLists) {
+    protected void init(List<EdgeListDao> edgeLists) {
 
         graph = new DirectedWeightedMultigraph<>(CustomWeightEdge.class);
         nodeSet = new HashSet<>();
-        for (EdgeListDeps edge : edgeLists) {
+        for (EdgeListDao edge : edgeLists) {
             cityCodeToNameMap.putIfAbsent(edge.getOrigin(), edge.getDestCity());
             cityCodeToNameMap.putIfAbsent(edge.getDestination(), edge.getDestCity());
-            nodeSet.add(new CustomNode(edge.getOrigin(), edge.getOriginCity()));
+            nodeSet.add(new CustomNode(edge.getOrigin(), edge.getOrigCity()));
             nodeSet.add(new CustomNode(edge.getDestination(), edge.getDestCity()));
         }
-        for (EdgeListDeps edge : edgeLists) {
+        for (EdgeListDao edge : edgeLists) {
                 graph.addVertex(edge.getOriginNode());
                 graph.addVertex(edge.getDestNode());
                 List<String> airlines = ClickHouseArrayMapper.getOrderedStringSet(edge.getAirline());
@@ -123,6 +121,7 @@ public class GraphSolver {
         }
         return customNodes;
     }
+
 
     public void getTopologyOrder() {
         moreDependencyFirstIterator.forEachRemaining(x->System.out.print(x.getCity()));

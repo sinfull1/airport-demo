@@ -38,22 +38,36 @@ public class EdgeList {
     @Column(name = "destCity",nullable = false)
     private String destCity;
 
+
     @Type(ListArrayType.class)
     @Column(
             name = "airline",
             columnDefinition = "Array(String)"
     )
     private List<String> airline;
-    @Column(name = "times",nullable = false)
-    private Float times;
+
+    @Type(ListArrayType.class)
+    @Column(
+            name = "arrTimes",
+            columnDefinition = "Array(String)"
+    )
+    private List<String> arrTimes;
+
+    @Type(ListArrayType.class)
+    @Column(
+            name = "depTimes",
+            columnDefinition = "Array(String)"
+    )
+    private List<String> depTimes;
 
 
     public static EdgeList builder(EdgeListDao edgeListDao) {
         EdgeList edgeList = new EdgeList();
         edgeList.setOrigin(edgeListDao.getOrigin());
-        edgeList.setTimes(edgeListDao.getTimes());
+        edgeList.setArrTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getArrTimes()));
         edgeList.setDestination(edgeListDao.getDestination());
         edgeList.setOriginCity(edgeListDao.getOrigCity());
+        edgeList.setDepTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getDepTimes()));
         edgeList.setAirline(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getAirline()));
         edgeList.setDestCity(edgeListDao.getDestCity());
         return edgeList;
@@ -61,9 +75,10 @@ public class EdgeList {
     public static EdgeList builderV2(EdgeListDao edgeListDao) {
         EdgeList edgeList = new EdgeList();
         edgeList.setOrigin(edgeListDao.getOrigin());
-        edgeList.setTimes(edgeListDao.getTimes());
+        edgeList.setArrTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getArrTimes()));
         edgeList.setDestination(edgeListDao.getDestination());
         edgeList.setOriginCity(edgeListDao.getOrigCity());
+        edgeList.setDepTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getDepTimes()));
         edgeList.setAirline(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getAirline()));
         edgeList.setDestCity(edgeListDao.getDestCity());
         return edgeList;

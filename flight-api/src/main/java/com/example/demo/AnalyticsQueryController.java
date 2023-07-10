@@ -3,13 +3,10 @@ package com.example.demo;
 import com.example.demo.dto.AnalysisResultDto;
 import com.example.demo.dto.MaxHopResultDto;
 import com.example.demo.dto.Path;
-import com.example.demo.entity.Carrier;
+import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
-import com.example.demo.repository.AirlineGuestRepo;
-import com.example.demo.repository.AnalysisResultDao;
-import com.example.demo.repository.CarrierRepo;
-import com.example.demo.repository.OntimeRepo;
+import com.example.demo.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.mapping.ClickHouseArrayMapper;
 import org.jgrapht.GraphPath;
@@ -20,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -30,20 +26,20 @@ public class AnalyticsQueryController {
     final AirlineGuestRepo airlineGuestRepo;
     final GraphSolver graphSolver;
     final OntimeRepo ontimeRepo;
-
     final CarrierRepo carrierRepo;
+    final EdgeListRepo edgeListRepo;
 
 
 
     public AnalyticsQueryController(StreamBridge streamBridge,
                                     AirlineGuestRepo airlineGuestRepo,
-                                    GraphSolver graphSolver, OntimeRepo ontimeRepo, CarrierRepo carrierRepo) {
+                                    GraphSolver graphSolver, OntimeRepo ontimeRepo, CarrierRepo carrierRepo, EdgeListRepo edgeListRepo) {
         this.streamBridge = streamBridge;
         this.airlineGuestRepo = airlineGuestRepo;
         this.graphSolver = graphSolver;
         this.ontimeRepo = ontimeRepo;
         this.carrierRepo = carrierRepo;
-
+        this.edgeListRepo = edgeListRepo;
     }
 
     private void init() {
@@ -130,10 +126,10 @@ public class AnalyticsQueryController {
         return Mono.just(graphSolver.getAllNodes());
     }
 
-    @GetMapping("/topo")
-    public Mono<Void> topo() {
-        graphSolver.getTopologyOrder();
-        return null;
+    @GetMapping("/dests/{origin}")
+    public Mono<List<EdgeList>> dests(@PathVariable("origin") String origin) {
+        return Mono.just(edgeListRepo.getAllDest(origin).stream().map(EdgeList::builderV2).toList());
+
     }
 
     @GetMapping("/connected")

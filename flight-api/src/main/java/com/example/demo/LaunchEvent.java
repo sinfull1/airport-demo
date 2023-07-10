@@ -88,7 +88,8 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-     //  edgeListRepo.saveAll(edgeList);
+        List<EdgeList> edgeList = ontimeRepo.getEdgeListWithDeps().stream().map(EdgeList::builderV2).collect(Collectors.toList());
+        edgeListRepo.saveAll(edgeList);
         graphSolver.init(ontimeRepo.getEdgeListWithDeps());
     }
 }

@@ -53,5 +53,5 @@ public interface OntimeRepo extends CrudRepository<Ontime, String> {
             "  WHERE o.depTime < o.arrTime " +
             "  group BY 1, 2, 3, 4 " +
             "  ORDER BY 1, 3, 6, 7")
-    List<EdgeListDeps> getEdgeListWithDeps();
+    List<EdgeListDao> getEdgeListWithDeps();
 }
