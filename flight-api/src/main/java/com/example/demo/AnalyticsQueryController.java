@@ -130,11 +130,11 @@ public class AnalyticsQueryController {
         return Mono.just(graphSolver.getAllNodes());
     }
 
-    @GetMapping("/dests/{origin}")
-    public Mono<Collection<EdgeResultDto>> dests(@PathVariable("origin") String origin) {
+    @GetMapping("/dests/{origin}/{dest}")
+    public Mono<Collection<EdgeResultDto>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
         System.out.print(origin);
         LinkedList<EdgeResultDao> result = new LinkedList<>();
-        recursive(origin, (System.currentTimeMillis()/1000) - 100*30*24*3600, result, 0);
+        bfs(origin, dest, (System.currentTimeMillis()/1000) - 100*30*24*3600, result, 0);
         return Mono.just(result.stream().map(EdgeResultDto::new).toList());
 
     }
@@ -144,15 +144,16 @@ public class AnalyticsQueryController {
         return Mono.just(graphSolver.connectComponents());
     }
 
-    private void recursive(String origin, Long arrTime, LinkedList<EdgeResultDao> lists, int depth) {
+    private void bfs(String origin, String finalDestination, Long arrTime, LinkedList<EdgeResultDao> lists, int depth) {
         if (depth == 3 ) {
             return;
         }
-        List<EdgeResultDao>  temp = edgeListRepo.getNew(origin).stream().filter(x->x.getDepTime() > arrTime).toList();
+        List<EdgeResultDao>  temp = edgeListRepo.getDestinations(origin, arrTime, finalDestination);
+
         lists.addAll(temp);
         for (EdgeResultDao edgeList: temp) {
              System.out.println(origin + "  " + edgeList.getString());
-             recursive(edgeList.getDestination(), edgeList.getArrTime(), lists, depth +1 );
+             bfs(edgeList.getDestination(), finalDestination,  edgeList.getArrTime(), lists, depth +1 );
         }
     }
 }
