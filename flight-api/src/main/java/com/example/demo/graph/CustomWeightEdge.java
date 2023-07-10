@@ -8,25 +8,25 @@ import java.util.List;
 public class CustomWeightEdge extends DefaultWeightedEdge {
 
     String airline;
-    int startTime;
-    int endTime;
+    long startTime;
+    long endTime;
     public void setAirline(String airline) {
         this.airline = airline;
     }
 
-    public int getStartTime() {
+    public long getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(int startTime) {
+    public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public int getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(int endTime) {
+    public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
 

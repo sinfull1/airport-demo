@@ -5,7 +5,6 @@ import com.example.demo.entity.EdgeList;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
 import com.example.demo.repository.CarrierRepo;
-import com.example.demo.repository.EdgeListDao;
 import com.example.demo.repository.EdgeListRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.mapping.ClickHouseArrayMapper;
@@ -45,28 +44,28 @@ public class GraphSolver {
         this.carrierRepo = carrierRepo;
     }
 
-    protected void init(List<EdgeListDao> edgeLists) {
+    protected void init(List<EdgeList> edgeLists) {
 
         graph = new DirectedWeightedMultigraph<>(CustomWeightEdge.class);
         nodeSet = new HashSet<>();
-        for (EdgeListDao edge : edgeLists) {
+        for (EdgeList edge : edgeLists) {
             cityCodeToNameMap.putIfAbsent(edge.getOrigin(), edge.getDestCity());
             cityCodeToNameMap.putIfAbsent(edge.getDestination(), edge.getDestCity());
-            nodeSet.add(new CustomNode(edge.getOrigin(), edge.getOrigCity()));
+            nodeSet.add(new CustomNode(edge.getOrigin(), edge.getOriginCity()));
             nodeSet.add(new CustomNode(edge.getDestination(), edge.getDestCity()));
         }
-        for (EdgeListDao edge : edgeLists) {
+        for (EdgeList edge : edgeLists) {
                 graph.addVertex(edge.getOriginNode());
                 graph.addVertex(edge.getDestNode());
-                List<String> airlines = ClickHouseArrayMapper.getOrderedStringSet(edge.getAirline());
-                List<Integer> arrTimes = ClickHouseArrayMapper.getOrderedIntegerSet(edge.getArrTimes());
-                List<Integer> depTimes = ClickHouseArrayMapper.getOrderedIntegerSet(edge.getDepTimes());
-                for (int i =0; i< airlines.size(); i++) {
+                String[] airlines = edge.getAirline();
+                long[] arrTimes = edge.getArrTimes();
+                long[] depTimes = edge.getDepTimes();
+                for (int i =0; i< airlines.length; i++) {
                     CustomWeightEdge weightedEdge = graph.addEdge(edge.getOriginNode(), edge.getDestNode());
-                    weightedEdge.setAirline(airlines.get(i));
-                    weightedEdge.setStartTime(depTimes.get(i));
-                    weightedEdge.setEndTime(arrTimes.get(i));
-                    graph.setEdgeWeight(weightedEdge, arrTimes.get(i) - depTimes.get(i));
+                    weightedEdge.setAirline(airlines[i]);
+                    weightedEdge.setStartTime(depTimes[i]);
+                    weightedEdge.setEndTime(arrTimes[i]);
+                    graph.setEdgeWeight(weightedEdge, arrTimes[i] - depTimes[i]);
                 }
         }
         for (Carrier carrier : carrierRepo.findAll()) {

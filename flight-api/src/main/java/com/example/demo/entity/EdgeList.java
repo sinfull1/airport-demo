@@ -1,18 +1,16 @@
 package com.example.demo.entity;
 
 
+import com.example.demo.Utils;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.repository.EdgeListDao;
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
+import com.example.demo.types.LongArrayUserType;
+import com.example.demo.types.StringArrayUserType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
-import org.hibernate.mapping.ClickHouseArrayMapper;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Entity
 @Getter
@@ -29,6 +27,8 @@ public class EdgeList {
     @Column(name = "origin", nullable = false)
     private String origin;
 
+
+
     @Column(name = "originCity",nullable = false)
     private String originCity;
 
@@ -39,47 +39,35 @@ public class EdgeList {
     private String destCity;
 
 
-    @Type(ListArrayType.class)
+    @Type(StringArrayUserType.class)
     @Column(
             name = "airline",
             columnDefinition = "Array(String)"
     )
-    private List<String> airline;
+    private String[] airline;
 
-    @Type(ListArrayType.class)
+    @Type(LongArrayUserType.class)
     @Column(
             name = "arrTimes",
-            columnDefinition = "Array(String)"
+            columnDefinition = "Array(UInt64)"
     )
-    private List<String> arrTimes;
+    private long[] arrTimes;
 
-    @Type(ListArrayType.class)
+    @Type(LongArrayUserType.class)
     @Column(
             name = "depTimes",
-            columnDefinition = "Array(String)"
+            columnDefinition = "Array(UInt64)"
     )
-    private List<String> depTimes;
+    private long[] depTimes;
 
-
-    public static EdgeList builder(EdgeListDao edgeListDao) {
-        EdgeList edgeList = new EdgeList();
-        edgeList.setOrigin(edgeListDao.getOrigin());
-        edgeList.setArrTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getArrTimes()));
-        edgeList.setDestination(edgeListDao.getDestination());
-        edgeList.setOriginCity(edgeListDao.getOrigCity());
-        edgeList.setDepTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getDepTimes()));
-        edgeList.setAirline(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getAirline()));
-        edgeList.setDestCity(edgeListDao.getDestCity());
-        return edgeList;
-    }
     public static EdgeList builderV2(EdgeListDao edgeListDao) {
         EdgeList edgeList = new EdgeList();
         edgeList.setOrigin(edgeListDao.getOrigin());
-        edgeList.setArrTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getArrTimes()));
+        edgeList.setArrTimes(Utils.getIntegerArray(edgeListDao.getArrTimes()));
         edgeList.setDestination(edgeListDao.getDestination());
-        edgeList.setOriginCity(edgeListDao.getOrigCity());
-        edgeList.setDepTimes(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getDepTimes()));
-        edgeList.setAirline(ClickHouseArrayMapper.getOrderedStringSet(edgeListDao.getAirline()));
+        edgeList.setOriginCity(edgeListDao.getOriginCity());
+        edgeList.setDepTimes(Utils.getIntegerArray(edgeListDao.getDepTimes()));
+        edgeList.setAirline(Utils.getStringArray(edgeListDao.getAirline()));
         edgeList.setDestCity(edgeListDao.getDestCity());
         return edgeList;
     }

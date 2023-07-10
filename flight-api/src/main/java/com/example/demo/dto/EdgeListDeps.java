@@ -1,14 +1,7 @@
 package com.example.demo.dto;
 
 
-import com.example.demo.graph.CustomNode;
-import com.example.demo.repository.EdgeListDao;
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
-import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
-import org.hibernate.mapping.ClickHouseArrayMapper;
 
 import java.util.List;
 

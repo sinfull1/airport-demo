@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dto.AnalysisResultDto;
+import com.example.demo.dto.EdgeResultDto;
 import com.example.demo.dto.MaxHopResultDto;
 import com.example.demo.dto.Path;
 import com.example.demo.entity.EdgeList;
@@ -16,7 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @RestController
 @Slf4j
@@ -127,13 +131,28 @@ public class AnalyticsQueryController {
     }
 
     @GetMapping("/dests/{origin}")
-    public Mono<List<EdgeList>> dests(@PathVariable("origin") String origin) {
-        return Mono.just(edgeListRepo.getAllDest(origin).stream().map(EdgeList::builderV2).toList());
+    public Mono<Collection<EdgeResultDto>> dests(@PathVariable("origin") String origin) {
+        System.out.print(origin);
+        LinkedList<EdgeResultDao> result = new LinkedList<>();
+        recursive(origin, (System.currentTimeMillis()/1000) - 100*30*24*3600, result, 0);
+        return Mono.just(result.stream().map(EdgeResultDto::new).toList());
 
     }
 
     @GetMapping("/connected")
     public Mono<List<Set<CustomNode>>> connectComponents() {
         return Mono.just(graphSolver.connectComponents());
+    }
+
+    private void recursive(String origin, Long arrTime, LinkedList<EdgeResultDao> lists, int depth) {
+        if (depth == 3 ) {
+            return;
+        }
+        List<EdgeResultDao>  temp = edgeListRepo.getNew(origin).stream().filter(x->x.getDepTime() > arrTime).toList();
+        lists.addAll(temp);
+        for (EdgeResultDao edgeList: temp) {
+             System.out.println(origin + "  " + edgeList.getString());
+             recursive(edgeList.getDestination(), edgeList.getArrTime(), lists, depth +1 );
+        }
     }
 }
