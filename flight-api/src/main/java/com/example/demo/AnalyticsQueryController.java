@@ -1,10 +1,6 @@
 package com.example.demo;
 
-import com.example.demo.dto.AnalysisResultDto;
-import com.example.demo.dto.EdgeResultDto;
-import com.example.demo.dto.MaxHopResultDto;
-import com.example.demo.dto.Path;
-import com.example.demo.entity.EdgeList;
+import com.example.demo.dto.*;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
 import com.example.demo.repository.*;
@@ -17,10 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
-import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RestController
 @Slf4j
@@ -32,7 +25,6 @@ public class AnalyticsQueryController {
     final OntimeRepo ontimeRepo;
     final CarrierRepo carrierRepo;
     final EdgeListRepo edgeListRepo;
-
 
 
     public AnalyticsQueryController(StreamBridge streamBridge,
@@ -51,7 +43,7 @@ public class AnalyticsQueryController {
     }
 
     @GetMapping("/getMaxHops")
-    public Mono<  List<MaxHopResultDto> > maxHops() {
+    public Mono<List<MaxHopResultDto>> maxHops() {
         List<CustomNode> nodes = graphSolver.getAllNodes();
         List<CustomNode> longest = null;
         List<CustomWeightEdge> longestEdges = null;
@@ -72,15 +64,15 @@ public class AnalyticsQueryController {
         return Mono.just(craftResponse(longest, longestEdges));
     }
 
-    private  List<MaxHopResultDto> craftResponse(List<CustomNode> longest, List<CustomWeightEdge> longestEdges) {
+    private List<MaxHopResultDto> craftResponse(List<CustomNode> longest, List<CustomWeightEdge> longestEdges) {
         int length = longest.size();
         List<MaxHopResultDto> maxHopResultDtos = new ArrayList<>();
-        for (int i =0 ;i< length-1; i++) {
-            MaxHopResultDto maxHopResultDto =  new MaxHopResultDto();
+        for (int i = 0; i < length - 1; i++) {
+            MaxHopResultDto maxHopResultDto = new MaxHopResultDto();
             maxHopResultDto.setSource(longest.get(i));
-            maxHopResultDto.setDestination(longest.get(i+1));
+            maxHopResultDto.setDestination(longest.get(i + 1));
             maxHopResultDto.setFlightTime(longestEdges.get(i).getWeight());
-        //    maxHopResultDto.setAirlines(longestEdges.get(i).getAirline().stream().map(GraphSolver::getCodeToAirline).toList());
+            //    maxHopResultDto.setAirlines(longestEdges.get(i).getAirline().stream().map(GraphSolver::getCodeToAirline).toList());
             maxHopResultDtos.add(maxHopResultDto);
         }
         return maxHopResultDtos;
@@ -131,11 +123,13 @@ public class AnalyticsQueryController {
     }
 
     @GetMapping("/dests/{origin}/{dest}")
-    public Mono<Collection<EdgeResultDto>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
+    public Mono<List<String>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
         System.out.print(origin);
         LinkedList<EdgeResultDao> result = new LinkedList<>();
-        bfs(origin, dest, (System.currentTimeMillis()/1000) - 100*30*24*3600, result, 0);
-        return Mono.just(result.stream().map(EdgeResultDto::new).toList());
+        HashSet<TravNode> visited = new HashSet<>();
+        LinkedList<TravNode> queue = new LinkedList<>();
+        List<String> route = bfs(origin, dest, (System.currentTimeMillis() / 1000) - 100 * 30 * 24 * 3600, result, visited, queue, 0);
+        return Mono.just(route);
 
     }
 
@@ -144,16 +138,39 @@ public class AnalyticsQueryController {
         return Mono.just(graphSolver.connectComponents());
     }
 
-    private void bfs(String origin, String finalDestination, Long arrTime, LinkedList<EdgeResultDao> lists, int depth) {
-        if (depth == 3 ) {
-            return;
+    private List<String> bfs(String origin, String finalDestination, Long arrTime, LinkedList<EdgeResultDao> lists,
+                     Set<TravNode> vst, LinkedList<TravNode> queue, int depth) {
+        TravNode start = new TravNode(origin, arrTime);
+        vst.add(start);
+        queue.add(start);
+        Map<String, String> backTrack = new HashMap<>();
+        while (queue.size() != 0) {
+            TravNode popped = queue.pop();
+            List<EdgeResultDao> results = edgeListRepo.getDestinations(popped.getDestination(), popped.getArrTime());
+            for (EdgeResultDao child : results) {
+                if (child.getDestination().equals(finalDestination)) {
+                    backTrack.put(child.getDestination(), popped.getDestination());
+                    queue = new LinkedList<>();
+                    break;
+                }
+                if (!vst.contains(child)) {
+                    backTrack.put(child.getDestination(), popped.getDestination());
+                    System.out.println(popped.getDestination() + " " + child.getDestination());
+                    TravNode childNode = new TravNode(child.getDestination(), child.getArrTime());
+                    vst.add(childNode);
+                    queue.add(childNode);
+                }
+            }
         }
-        List<EdgeResultDao>  temp = edgeListRepo.getDestinations(origin, arrTime, finalDestination);
+        List<String> route = new ArrayList<>();
+        String desti = finalDestination;
+        route.add(desti);
+        while (desti != null) {
+            desti = backTrack.get(desti);
+            route.add(desti);
+        }
+        return route;
 
-        lists.addAll(temp);
-        for (EdgeResultDao edgeList: temp) {
-             System.out.println(origin + "  " + edgeList.getString());
-             bfs(edgeList.getDestination(), finalDestination,  edgeList.getArrTime(), lists, depth +1 );
-        }
+
     }
 }
