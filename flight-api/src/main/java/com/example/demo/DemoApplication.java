@@ -1,6 +1,7 @@
 package com.example.demo;
 
 
+import com.redis.om.spring.annotations.EnableRedisDocumentRepositories;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,6 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @EnableScheduling
 @EnableCaching
+@EnableRedisDocumentRepositories
 public class DemoApplication {
 
     public static void main(String[] args) {

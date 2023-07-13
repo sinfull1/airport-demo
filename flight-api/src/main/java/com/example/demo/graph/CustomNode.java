@@ -4,8 +4,6 @@ package com.example.demo.graph;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Objects;
-
 @Data
 @AllArgsConstructor
 public class CustomNode {
@@ -26,6 +24,7 @@ public class CustomNode {
         return code.hashCode();
     }
 
-    private String city;
+    private Long arrTime;
+
 
 }

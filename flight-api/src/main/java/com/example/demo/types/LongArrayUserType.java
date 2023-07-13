@@ -22,15 +22,15 @@ public class LongArrayUserType implements UserType<long[]> {
 
     @Override
     public boolean equals(long[] x, long[] y) {
-       if (x.length != y.length) {
-           return false;
-       }
-       for (int i =0; i <x.length; i++) {
-           if (!(x[i] == y[i])) {
-               return false;
-           }
-       }
-       return true;
+        if (x.length != y.length) {
+            return false;
+        }
+        for (int i = 0; i < x.length; i++) {
+            if (!(x[i] == y[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -48,7 +48,7 @@ public class LongArrayUserType implements UserType<long[]> {
     }
 
     @Override
-    public void nullSafeSet(PreparedStatement preparedStatement,long[] value, int index, SharedSessionContractImplementor session) throws SQLException {
+    public void nullSafeSet(PreparedStatement preparedStatement, long[] value, int index, SharedSessionContractImplementor session) throws SQLException {
         Connection connection = preparedStatement.getConnection();
         if (value == null) {
             preparedStatement.setNull(index, Types.ARRAY);
@@ -68,7 +68,6 @@ public class LongArrayUserType implements UserType<long[]> {
         long[] source = (long[]) value;
         return Arrays.copyOf(source, source.length);
     }
-
 
 
     @Override

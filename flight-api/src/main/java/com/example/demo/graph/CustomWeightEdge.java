@@ -3,30 +3,31 @@ package com.example.demo.graph;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import java.util.List;
+import java.time.Instant;
 
 public class CustomWeightEdge extends DefaultWeightedEdge {
 
     String airline;
-    long startTime;
-    long endTime;
+    Instant startTime;
+    Instant endTime;
+
     public void setAirline(String airline) {
         this.airline = airline;
     }
 
-    public long getStartTime() {
+    public Instant getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(long startTime) {
+    public void setStartTime(Instant startTime) {
         this.startTime = startTime;
     }
 
-    public long getEndTime() {
+    public Instant getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(long endTime) {
+    public void setEndTime(Instant endTime) {
         this.endTime = endTime;
     }
 
@@ -38,7 +39,6 @@ public class CustomWeightEdge extends DefaultWeightedEdge {
     public String getAirline() {
         return airline;
     }
-
 
 
 }

@@ -17,7 +17,11 @@ services:
       - REDPANDA_LISTENERS=PLAINTEXT://0.0.0.0:9094
     volumes:
       - ./redpanda:/var/lib/redpanda
-
+  redis-stack-server:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
   zookeeper:
     image: wurstmeister/zookeeper
     container_name: zookeeper

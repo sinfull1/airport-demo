@@ -1,6 +1,5 @@
 package com.example.demo.types;
 
-import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.usertype.UserType;
 
@@ -22,15 +21,15 @@ public class StringArrayUserType implements UserType<String[]> {
 
     @Override
     public boolean equals(String[] x, String[] y) {
-       if (x.length != y.length) {
-           return false;
-       }
-       for (int i =0; i <x.length; i++) {
-           if (!x[i].equals(y[i])) {
-               return false;
-           }
-       }
-       return true;
+        if (x.length != y.length) {
+            return false;
+        }
+        for (int i = 0; i < x.length; i++) {
+            if (!x[i].equals(y[i])) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -68,9 +67,6 @@ public class StringArrayUserType implements UserType<String[]> {
         String[] source = (String[]) value;
         return Arrays.copyOf(source, source.length);
     }
-
-
-
 
 
     @Override

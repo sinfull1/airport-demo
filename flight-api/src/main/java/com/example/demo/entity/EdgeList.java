@@ -2,8 +2,7 @@ package com.example.demo.entity;
 
 
 import com.example.demo.Utils;
-import com.example.demo.graph.CustomNode;
-import com.example.demo.repository.EdgeListDao;
+import com.example.demo.dao.EdgeListDao;
 import com.example.demo.types.LongArrayUserType;
 import com.example.demo.types.StringArrayUserType;
 import jakarta.persistence.*;
@@ -28,14 +27,13 @@ public class EdgeList {
     private String origin;
 
 
-
-    @Column(name = "originCity",nullable = false)
+    @Column(name = "originCity", nullable = false)
     private String originCity;
 
-    @Column(name = "destination",nullable = false)
+    @Column(name = "destination", nullable = false)
     private String destination;
 
-    @Column(name = "destCity",nullable = false)
+    @Column(name = "destCity", nullable = false)
     private String destCity;
 
 
@@ -72,11 +70,5 @@ public class EdgeList {
         return edgeList;
     }
 
-    public CustomNode getOriginNode() {
-        return new CustomNode(this.origin, this.originCity);
-    }
 
-    public CustomNode getDestNode() {
-        return new CustomNode(this.destination, this.destCity);
-    }
 }
