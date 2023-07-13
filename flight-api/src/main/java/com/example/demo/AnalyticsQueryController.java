@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dao.EdgeResultDao;
+import com.example.demo.dao.OriginList;
 import com.example.demo.dto.AirportEdgeResult;
 import com.example.demo.graph.CustomNode;
 import com.example.demo.graph.CustomWeightEdge;
@@ -37,10 +38,11 @@ public class AnalyticsQueryController {
 
     public AnalyticsQueryController(StreamBridge streamBridge,
                                     AirlineGuestRepo airlineGuestRepo,
-                                    OntimeRepo ontimeRepo, CarrierRepo carrierRepo, EdgeListRepo edgeListRepo, AirportEdgeResultRepo airportEdgeResultRepo) {
+                                    OntimeRepo ontimeRepo, CarrierRepo carrierRepo,
+                                    EdgeListRepo edgeListRepo,
+                                    AirportEdgeResultRepo airportEdgeResultRepo) {
         this.streamBridge = streamBridge;
         this.airlineGuestRepo = airlineGuestRepo;
-
         this.ontimeRepo = ontimeRepo;
         this.carrierRepo = carrierRepo;
         this.edgeListRepo = edgeListRepo;
@@ -49,19 +51,22 @@ public class AnalyticsQueryController {
 
     @GetMapping("/short")
     public Mono<GraphPath<CustomNode, CustomWeightEdge>> shortLong() {
-        List<String> origins = edgeListRepo.getAllOrigin();
+        List<OriginList> origins = edgeListRepo.getAllOrigin();
         int longest = 0;
         GraphPath<CustomNode, CustomWeightEdge> largest;
         for (int i = 0; i < origins.size(); i++) {
             for (int j = i; j < origins.size(); j++) {
                 if (i != j) {
-                    GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origins.get(i), origins.get(j),
-                            1672750800L);
-                    if (route.getVertexList().size() > longest) {
-                        longest = route.getVertexList().size();
-                        largest = route;
-                        System.out.println(largest.getVertexList());
-                    }
+                    try {
+                        GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origins.get(i).getOrigin(),
+                                origins.get(j).getOrigin(),
+                                1672750800L);
+                        if (route.getVertexList().size() > longest) {
+                            longest = route.getVertexList().size();
+                            largest = route;
+                            System.out.println(largest.getVertexList());
+                        }
+                    }catch (Exception ignored) {}
                 }
             }
         }

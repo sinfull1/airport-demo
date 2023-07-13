@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.dao.EdgeResultDao;
+import com.example.demo.dao.OriginList;
 import com.example.demo.entity.EdgeList;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -17,7 +18,7 @@ public interface EdgeListRepo extends CrudRepository<EdgeList, String> {
             "from edges e ) x order by 1,2,5,3,4", nativeQuery = true)
     List<EdgeResultDao> getDestinationsAll();
 
-    @Query(value = "select e.origin from EdgeList e")
-    List<String> getAllOrigin();
+    @Query(value = "select  e.origin as origin, count(*) as counts from EdgeList e group by e.origin order by 2 LIMIT 50")
+    List<OriginList> getAllOrigin();
 
 }
