@@ -49,7 +49,7 @@ public class AnalyticsQueryController {
         this.airportEdgeResultRepo = airportEdgeResultRepo;
     }
 
-    @GetMapping("/short")
+    @GetMapping("/getMaxHops")
     public Mono<GraphPath<CustomNode, CustomWeightEdge>> shortLong() {
         List<OriginList> origins = edgeListRepo.getAllOrigin();
         int longest = 0;
@@ -58,14 +58,9 @@ public class AnalyticsQueryController {
             for (int j = i; j < origins.size(); j++) {
                 if (i != j) {
                     try {
-                        GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origins.get(i).getOrigin(),
+                        List<GraphPath<CustomNode, CustomWeightEdge>> route = buildGraph(origins.get(i).getOrigin(),
                                 origins.get(j).getOrigin(),
                                 1672750800L);
-                        if (route.getVertexList().size() > longest) {
-                            longest = route.getVertexList().size();
-                            largest = route;
-                            System.out.println(largest.getVertexList());
-                        }
                     }catch (Exception ignored) {}
                 }
             }
@@ -74,30 +69,30 @@ public class AnalyticsQueryController {
 
     }
 
-    @GetMapping("/dests/{origin}/{dest}")
-    public Mono<GraphPath<CustomNode, CustomWeightEdge>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
-        System.out.print(origin);
-        LinkedList<EdgeResultDao> result = new LinkedList<>();
-        GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origin, dest, 1672750800L);
+    @GetMapping("/path/shortest/{origin}/{dest}")
+    public Mono< List<GraphPath<CustomNode, CustomWeightEdge>>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
+        List<GraphPath<CustomNode, CustomWeightEdge>> route = buildGraph(origin, dest, 1672750800L);
         return Mono.just(route);
     }
 
-    private GraphPath<CustomNode, CustomWeightEdge> buildGraph(String origin, String finalDestination, Long arrTime) {
-        DirectedWeightedMultigraph<CustomNode, CustomWeightEdge> graph = new DirectedWeightedMultigraph<>(CustomWeightEdge.class);
-        BellmanFordShortestPath<CustomNode, CustomWeightEdge> shortestPathAlgorithm = new BellmanFordShortestPath<>(graph);
-        HashSet<CustomNode> vst = new HashSet<>();
-        LinkedList<CustomNode> queue = new LinkedList<>();
-        Page<AirportEdgeResult> results = airportEdgeResultRepo
+    private  List<GraphPath<CustomNode, CustomWeightEdge>> buildGraph(String origin, String finalDestination, Long arrTime) {
+
+        Set<AirportEdgeResult> results = getSubList(airportEdgeResultRepo
                 .findByOriginAndDepTimeBetween(origin, arrTime, arrTime + 4 * 24 * 60 * 60,
-                        PageRequest.of(0, 4000, Sort.by("depTime")));
-        Set<AirportEdgeResult> subTempResult = getSubList(results);
-        for (AirportEdgeResult entry : subTempResult) {
+                        PageRequest.of(0, 4000, Sort.by("depTime"))));
+        List<GraphPath<CustomNode, CustomWeightEdge>> paths = new ArrayList<>();
+        for (AirportEdgeResult entry : results) {
+            DirectedWeightedMultigraph<CustomNode, CustomWeightEdge> graph = new DirectedWeightedMultigraph<>(CustomWeightEdge.class);
+            BellmanFordShortestPath<CustomNode, CustomWeightEdge> shortestPathAlgorithm = new BellmanFordShortestPath<>(graph);
+            HashSet<CustomNode> vst = new HashSet<>();
+            LinkedList<CustomNode> queue = new LinkedList<>();
             setVertexAndEdge(graph, entry);
             queue.add(entry.getDestinationNode());
             vst.add(entry.getDestinationNode());
+            CustomNode finalNode = bfs(queue, finalDestination, graph, vst);
+            paths.add(shortestPathAlgorithm.getPath(new CustomNode(origin, arrTime), finalNode));
         }
-        CustomNode finalNode = bfs(queue, finalDestination, graph, vst);
-        return shortestPathAlgorithm.getPath(new CustomNode(origin, arrTime), finalNode);
+        return paths;
     }
 
     private CustomNode bfs(LinkedList<CustomNode> queue, String finalDestination,
@@ -107,11 +102,10 @@ public class AnalyticsQueryController {
         while (queue.size() != 0) {
             CustomNode popped = queue.pop();
             graph.addVertex(popped);
-            Page<AirportEdgeResult> childs = airportEdgeResultRepo.
+            Set<AirportEdgeResult> childs =  getSubList(airportEdgeResultRepo.
                     findByOriginAndDepTimeBetween(popped.getCode(), popped.getArrTime(), popped.getArrTime() + 24 * 60 * 60,
-                            PageRequest.of(0, 4000, Sort.by("depTime")));
-            Set<AirportEdgeResult> subTempsResult = getSubList(childs);
-            for (AirportEdgeResult child : subTempsResult) {
+                            PageRequest.of(0, 4000, Sort.by("depTime"))));
+            for (AirportEdgeResult child : childs) {
                 if (child.getDepTime() < popped.getArrTime()) {
                     continue;
                 }
@@ -147,5 +141,4 @@ public class AnalyticsQueryController {
                         minBy(comparingLong(AirportEdgeResult::getArrTime)))).values()
                 .stream().map(Optional::get).sorted().collect(toCollection(LinkedHashSet::new));
     }
-
 }

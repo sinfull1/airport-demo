@@ -11,6 +11,7 @@ import com.example.demo.repository.AirlineGuestRepo;
 import com.example.demo.repository.AirportEdgeResultRepo;
 import com.example.demo.repository.EdgeListRepo;
 import com.example.demo.repository.OntimeRepo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.cloud.stream.function.StreamBridge;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 
 
 @Component
+@Slf4j
 public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent> {
     final AirportEdgeResultRepo airportEdgeResultRepo;
 
@@ -59,18 +61,21 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
                             compression, level, format)).get();
 
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+           log.error(e.getLocalizedMessage());
         }
     }
 
     @Override
     public void onApplicationEvent(ApplicationStartedEvent event) {
         try {
+            long length = System.currentTimeMillis();
+            log.info(String.valueOf(length));
             loadData(SERVER_NAME, "carrier", "carriers.csv", ClickHouseCompression.NONE, 0, ClickHouseFormat.CSVWithNames);
-            loadData(SERVER_NAME, TABLE_NAME, "flight1.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+             loadData(SERVER_NAME, TABLE_NAME, "flight1.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
             //loadData(SERVER_NAME, TABLE_NAME, "flight2.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
             //loadData(SERVER_NAME, TABLE_NAME, "flight3.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
             //loadData(SERVER_NAME, TABLE_NAME, "flight4.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
+            log.info(String.valueOf(System.currentTimeMillis()-length));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

@@ -9,30 +9,11 @@ services:
       nofile:
         soft: 262144
         hard: 262144
-  redpanda:
-    image: redpandadata/redpanda
-    ports:
-      - 9094:9094
-    environment:
-      - REDPANDA_LISTENERS=PLAINTEXT://0.0.0.0:9094
-    volumes:
-      - ./redpanda:/var/lib/redpanda
+
   redis-stack-server:
     image: redis/redis-stack-server:latest
     container_name: redis
     ports:
       - "6379:6379"
-  zookeeper:
-    image: wurstmeister/zookeeper
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-  kafka:
-    image: wurstmeister/kafka
-    container_name: kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_ADVERTISED_HOST_NAME: localhost
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
 
