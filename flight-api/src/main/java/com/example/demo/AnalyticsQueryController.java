@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static java.util.Comparator.comparingLong;
@@ -35,7 +38,11 @@ public class AnalyticsQueryController {
     final CarrierRepo carrierRepo;
     final EdgeListRepo edgeListRepo;
     final AirportEdgeResultRepo airportEdgeResultRepo;
-
+    Comparator<GraphPath<CustomNode, CustomWeightEdge>> comparator = (o1, o2) -> {
+        Long o1Value = o1.getEndVertex().getArrTime() - o1.getStartVertex().getArrTime();
+        Long o2Value = o2.getEndVertex().getArrTime() - o2.getStartVertex().getArrTime();
+        return o1Value.compareTo(o2Value);
+    };
     public AnalyticsQueryController(StreamBridge streamBridge,
                                     AirlineGuestRepo airlineGuestRepo,
                                     OntimeRepo ontimeRepo, CarrierRepo carrierRepo,
@@ -58,24 +65,34 @@ public class AnalyticsQueryController {
             for (int j = i; j < origins.size(); j++) {
                 if (i != j) {
                     try {
-                        List<GraphPath<CustomNode, CustomWeightEdge>> route = buildGraph(origins.get(i).getOrigin(),
+                        GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origins.get(i).getOrigin(),
                                 origins.get(j).getOrigin(),
                                 1672750800L);
+                        if (route.getVertexList().size() > longest) {
+                            longest = route.getVertexList().size();
+                            largest = route;
+                            System.out.println(largest.getEdgeList());
+                        }
                     }catch (Exception ignored) {}
                 }
             }
         }
         return Mono.empty();
-
     }
 
-    @GetMapping("/path/shortest/{origin}/{dest}")
-    public Mono< List<GraphPath<CustomNode, CustomWeightEdge>>> dests(@PathVariable("origin") String origin, @PathVariable("dest") String dest) {
-        List<GraphPath<CustomNode, CustomWeightEdge>> route = buildGraph(origin, dest, 1672750800L);
+    @GetMapping("/path/shortest/{origin}/{dest}/{date}")
+    public Mono< GraphPath<CustomNode, CustomWeightEdge>> dests(@PathVariable("origin") String origin,
+                                                                @PathVariable("dest") String dest,
+                                                                @PathVariable("date") String date) {
+        LocalDate localDate = LocalDate.parse(date, java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDateTime localDateTime = localDate.atStartOfDay();
+        long epochSeconds = localDateTime.toEpochSecond(ZoneOffset.UTC);
+        GraphPath<CustomNode, CustomWeightEdge> route = buildGraph(origin, dest, epochSeconds);
         return Mono.just(route);
     }
 
-    private  List<GraphPath<CustomNode, CustomWeightEdge>> buildGraph(String origin, String finalDestination, Long arrTime) {
+    private  GraphPath<CustomNode, CustomWeightEdge> buildGraph(String origin, String finalDestination, Long arrTime) {
+
 
         Set<AirportEdgeResult> results = getSubList(airportEdgeResultRepo
                 .findByOriginAndDepTimeBetween(origin, arrTime, arrTime + 4 * 24 * 60 * 60,
@@ -92,7 +109,9 @@ public class AnalyticsQueryController {
             CustomNode finalNode = bfs(queue, finalDestination, graph, vst);
             paths.add(shortestPathAlgorithm.getPath(new CustomNode(origin, arrTime), finalNode));
         }
-        return paths;
+        TreeSet<GraphPath<CustomNode, CustomWeightEdge>> treeSet = new TreeSet<>(comparator);
+        treeSet.addAll(paths);
+        return treeSet.first();
     }
 
     private CustomNode bfs(LinkedList<CustomNode> queue, String finalDestination,
