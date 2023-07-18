@@ -52,7 +52,8 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
     private void loadData(String server, String table, String fileName,
                           ClickHouseCompression compression, int level,
                           ClickHouseFormat format) throws FileNotFoundException {
-        File file = ResourceUtils.getFile("classpath:" + fileName);
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
         try {
             ClickHouseClient.load(
                     ClickHouseNode.of(server),
