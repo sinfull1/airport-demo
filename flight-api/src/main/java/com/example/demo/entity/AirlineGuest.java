@@ -1,7 +1,7 @@
 package com.example.demo.entity;
 
 
-import io.hypersistence.utils.hibernate.type.array.ListArrayType;
+import com.example.demo.types.StringArrayUserType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,12 +57,12 @@ public class AirlineGuest implements Serializable {
     @Column(name = "dest")
     AirportEnum dest;
 
-    @Type(ListArrayType.class)
+    @Type(StringArrayUserType.class)
     @Column(
             name = "reservations",
             columnDefinition = "Array(String)"
     )
-    private List<String> reservations;
+    private String[] reservations;
 
 
     public static AirlineGuest getRandomGuest() {
@@ -72,7 +72,7 @@ public class AirlineGuest implements Serializable {
         guest.setName(UUID.randomUUID().toString().substring(0, 10));
         guest.setOrigin(AirportEnum.values()[random.nextInt((int) AirportEnum.values().length / 2)]);
         guest.setDest(AirportEnum.values()[AirportEnum.values().length / 2 + random.nextInt(AirportEnum.values().length / 2) - 1]);
-        guest.setReservations(Arrays.asList(UUID.randomUUID().toString()));
+        guest.setReservations(new String[]{(UUID.randomUUID().toString())});
         guest.setDateColumn(java.sql.Date.from(Instant.ofEpochMilli(System.currentTimeMillis())));
         guest.setTimeColumn(Time.valueOf(LocalTime.MIDNIGHT));
         guest.setTimeStampColumn(Timestamp.from(Instant.ofEpochMilli(System.currentTimeMillis())));
