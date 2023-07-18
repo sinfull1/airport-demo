@@ -28,7 +28,7 @@
     <repositories>
         <repository>
             <id>snapshots-repo</id>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </repositories>
     <dependencyManagement>
@@ -167,8 +167,7 @@
         <dependency>
             <groupId>io.github.sinfull1</groupId>
             <artifactId>hibernate6-clickhouse-dialect</artifactId>
-            <version>1.0.2-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>1.0.2</version>
         </dependency>
 
 

@@ -79,11 +79,11 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        List<EdgeList> edgeList = ontimeRepo.getEdgeListWithDeps().stream().map(EdgeList::builderV2).collect(Collectors.toList());
+        List<EdgeList> edgeList = ontimeRepo.getEdgeListWithDeps().stream().map(EdgeList::builderV2).toList();
         edgeListRepo.saveAll(edgeList);
         List<AirportEdgeResult> airportEdgeResults = edgeListRepo.getDestinationsAll().stream()
                 .map(AirportEdgeResult::builder)
-                .collect(Collectors.toList());
+                .toList();
         airportEdgeResultRepo.saveAll(airportEdgeResults);
 
     }

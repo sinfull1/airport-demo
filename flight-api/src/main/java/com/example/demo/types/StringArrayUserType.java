@@ -64,7 +64,7 @@ public class StringArrayUserType implements UserType<String[]> {
         if (value == null) {
             return null;
         }
-        String[] source = (String[]) value;
+        String[] source = value;
         return Arrays.copyOf(source, source.length);
     }
 
