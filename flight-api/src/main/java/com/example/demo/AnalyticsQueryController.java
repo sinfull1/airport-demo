@@ -38,7 +38,7 @@ public class AnalyticsQueryController {
     final EdgeListRepo edgeListRepo;
     final AirportEdgeResultRepo airportEdgeResultRepo;
 
-    final long lookAheadTime = 4 * 24 * 60 * 60;
+    final static long lookAheadTime = 4 * 24 * 60 * 60L;
     Comparator<GraphPath<CustomNode, CustomWeightEdge>> comparator = (o1, o2) -> {
         Long o1Value = o1.getEndVertex().getArrTime() - o1.getStartVertex().getArrTime();
         Long o2Value = o2.getEndVertex().getArrTime() - o2.getStartVertex().getArrTime();
@@ -74,7 +74,7 @@ public class AnalyticsQueryController {
                         if (route.getVertexList().size() > longest) {
                             longest = route.getVertexList().size();
                             largest = route;
-                            System.out.println(largest.getEdgeList());
+                            log.info(largest.getEdgeList().toString());
                         }
                     } catch (Exception ignored) {
                     }
@@ -131,7 +131,7 @@ public class AnalyticsQueryController {
                                           HashSet<CustomNode> vst) {
         CustomNode finalNode = null;
         int destinationVisitedTimes = 5;
-        while (queue.size() != 0) {
+        while (!queue.isEmpty()) {
             CustomNode popped = queue.pop();
             graph.addVertex(popped);
             Set<AirportEdgeResult> children = getSubList(airportEdgeResultRepo.

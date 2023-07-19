@@ -64,12 +64,7 @@ public class ShortestPathTest {
         List<AirportEdgeResult> results4 = new ArrayList<>();
         List<AirportEdgeResult> results5 = new ArrayList<>();
         List<AirportEdgeResult> results6 = new ArrayList<>();
-        Mockito.when(pages1.get()).thenReturn(results1.stream());
-        Mockito.when(pages2.get()).thenReturn(results2.stream());
-        Mockito.when(pages3.get()).thenReturn(results3.stream());
-        Mockito.when(pages4.get()).thenReturn(results4.stream());
-        Mockito.when(pages5.get()).thenReturn(results5.stream());
-        Mockito.when(pages6.get()).thenReturn(results6.stream());
+
         AirportEdgeResult airportEdgeResult = new AirportEdgeResult("11", "SPN", "HNL", 20L, 10L, "DL");
         AirportEdgeResult airportEdgeResult1 = new AirportEdgeResult("11", "SPN", "SFO", 20L, 10L, "DL");
         AirportEdgeResult airportEdgeResult2 = new AirportEdgeResult("11", "SPN", "GFG", 20L, 10L, "DL");
@@ -105,6 +100,12 @@ public class ShortestPathTest {
         results5.add(airportEdgeResult8);
         //GFG
         results6.add(airportEdgeResult9);
+        Mockito.when(pages1.get()).thenReturn(results1.stream());
+        Mockito.when(pages2.get()).thenReturn(results2.stream());
+        Mockito.when(pages3.get()).thenReturn(results3.stream());
+        Mockito.when(pages4.get()).thenReturn(results4.stream());
+        Mockito.when(pages5.get()).thenReturn(results5.stream());
+        Mockito.when(pages6.get()).thenReturn(results6.stream());
         Mockito.when(airportEdgeResultRepo
                         .findByOriginAndDepTimeBetween(eq("SPN"), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(pages1);
