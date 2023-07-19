@@ -14,7 +14,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.Date;
+import java.util.Random;
+import java.util.UUID;
 
 @Entity
 @Getter

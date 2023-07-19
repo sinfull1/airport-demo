@@ -12,7 +12,7 @@ import java.util.List;
 @Repository
 public interface OntimeRepo extends CrudRepository<Ontime, String> {
 
-//TODO: change it to one step conversion and use redis table engine to insert data
+    //TODO: change it to one step conversion and use redis table engine to insert data
     @Query(value =
             "  SELECT o.origin as origin, " +
                     "  o.originCityName as originCity, " +

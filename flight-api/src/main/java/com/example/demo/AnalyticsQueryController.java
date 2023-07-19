@@ -1,6 +1,5 @@
 package com.example.demo;
 
-import com.example.demo.dao.EdgeResultDao;
 import com.example.demo.dao.OriginList;
 import com.example.demo.dto.AirportEdgeResult;
 import com.example.demo.graph.CustomNode;
@@ -22,7 +21,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
@@ -49,7 +47,8 @@ public class AnalyticsQueryController {
 
     public AnalyticsQueryController(StreamBridge streamBridge,
                                     AirlineGuestRepo airlineGuestRepo,
-                                    OntimeRepo ontimeRepo, CarrierRepo carrierRepo,
+                                    OntimeRepo ontimeRepo,
+                                    CarrierRepo carrierRepo,
                                     EdgeListRepo edgeListRepo,
                                     AirportEdgeResultRepo airportEdgeResultRepo) {
         this.streamBridge = streamBridge;
@@ -100,9 +99,9 @@ public class AnalyticsQueryController {
                 .findByOriginAndDepTimeBetween(origin, arrTime, arrTime + lookAheadTime,
                         PageRequest.of(0, 4000, Sort.by("depTime"))));
         List<GraphPath<CustomNode, CustomWeightEdge>> paths =
-        results.stream().parallel()
-                .map(entry -> getCustomNodeCustomWeightEdgeGraphPath(origin, finalDestination, arrTime, entry))
-                .filter(Objects::nonNull).toList();
+                results.stream().parallel()
+                        .map(entry -> getCustomNodeCustomWeightEdgeGraphPath(origin, finalDestination, arrTime, entry))
+                        .filter(Objects::nonNull).toList();
         TreeSet<GraphPath<CustomNode, CustomWeightEdge>> treeSet = new TreeSet<>(comparator);
         treeSet.addAll(paths);
         return treeSet.first();
@@ -128,15 +127,15 @@ public class AnalyticsQueryController {
     }
 
     private CustomNode bfsTillDestination(LinkedList<CustomNode> queue, String finalDestination,
-                           DirectedWeightedMultigraph<CustomNode, CustomWeightEdge> graph,
-                           HashSet<CustomNode> vst) {
+                                          DirectedWeightedMultigraph<CustomNode, CustomWeightEdge> graph,
+                                          HashSet<CustomNode> vst) {
         CustomNode finalNode = null;
         int destinationVisitedTimes = 5;
         while (queue.size() != 0) {
             CustomNode popped = queue.pop();
             graph.addVertex(popped);
             Set<AirportEdgeResult> children = getSubList(airportEdgeResultRepo.
-                    findByOriginAndDepTimeBetween(popped.getCode(), popped.getArrTime(), popped.getArrTime() + lookAheadTime/4,
+                    findByOriginAndDepTimeBetween(popped.getCode(), popped.getArrTime(), popped.getArrTime() + lookAheadTime / 4,
                             PageRequest.of(0, 4000, Sort.by("depTime"))));
             for (AirportEdgeResult child : children) {
                 if (child.getDepTime() < popped.getArrTime()) {
@@ -145,7 +144,7 @@ public class AnalyticsQueryController {
                 if (child.getDestination().equals(finalDestination)) {
                     finalNode = child.getDestinationNode();
                     setVertexAndEdge(graph, child);
-                    destinationVisitedTimes --;
+                    destinationVisitedTimes--;
                     if (destinationVisitedTimes == 0) {
                         queue = new LinkedList<>();
                         break;
@@ -171,7 +170,10 @@ public class AnalyticsQueryController {
         graph.setEdgeWeight(weightedEdge, entry.getArrTime() - entry.getDepTime());
     }
 
-    private Set<AirportEdgeResult> getSubList(Page<AirportEdgeResult> childs) {
+    public Set<AirportEdgeResult> getSubList(Page<AirportEdgeResult> childs) {
+        if (childs == null) {
+            return Collections.EMPTY_SET;
+        }
         return childs.get()
                 .collect(groupingBy(AirportEdgeResult::getDestination,
                         minBy(comparingLong(AirportEdgeResult::getArrTime))))

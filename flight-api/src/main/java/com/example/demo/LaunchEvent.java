@@ -17,13 +17,11 @@ import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -62,7 +60,7 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
                             compression, level, format)).get();
 
         } catch (InterruptedException | ExecutionException e) {
-           log.error(e.getLocalizedMessage());
+            log.error(e.getLocalizedMessage());
         }
     }
 
@@ -76,7 +74,7 @@ public class LaunchEvent implements ApplicationListener<ApplicationStartedEvent>
             //loadData(SERVER_NAME, TABLE_NAME, "flight2.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
             //loadData(SERVER_NAME, TABLE_NAME, "flight3.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
             //loadData(SERVER_NAME, TABLE_NAME, "flight4.gz", ClickHouseCompression.GZIP, 7, ClickHouseFormat.CSVWithNames);
-            log.info(String.valueOf(System.currentTimeMillis()-length));
+            log.info(String.valueOf(System.currentTimeMillis() - length));
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }

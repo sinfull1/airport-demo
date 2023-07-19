@@ -1,7 +1,7 @@
 package com.example.demo.dto;
 
-import com.example.demo.graph.CustomNode;
 import com.example.demo.dao.EdgeResultDao;
+import com.example.demo.graph.CustomNode;
 import com.redis.om.spring.annotations.Document;
 import com.redis.om.spring.annotations.Indexed;
 import lombok.AllArgsConstructor;
